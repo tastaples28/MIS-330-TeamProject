@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Furniture - Campus ReHome</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="./index.html">🏠 Campus ReHome</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="./furniture.html">Furniture</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./customers.html">Customers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./employees.html">Employees</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./transactions.html">Transactions</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="mb-2">🪑 Furniture Inventory</h1>
+        <p class="text-muted mb-0">Manage your furniture catalog</p>
+      </div>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFurnitureModal">
+        <span>+</span> Add New Furniture
+      </button>
+    </div>
+
+    <!-- Search and Filter Form -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <form class="row g-3" onsubmit="event.preventDefault(); filterFurniture();">
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Search by name or description" id="searchInput">
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" id="categorySelect">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-secondary w-100">Filter</button>
+          </div>
+          <div class="col-md-2">
+            <button type="button" onclick="clearFilter()" class="btn btn-outline-secondary w-100">Clear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Furniture Table -->
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Condition</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="furnitureTableBody">
+              <tr>
+                <td colspan="7" class="text-center">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Furniture Modal -->
+  <div class="modal fade" id="addFurnitureModal" tabindex="-1" aria-labelledby="addFurnitureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addFurnitureModalLabel">Add New Furniture</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addFurnitureForm">
+            <div class="mb-3">
+              <label for="itemName" class="form-label">Item Name *</label>
+              <input type="text" class="form-control" id="itemName" required>
+            </div>
+            <div class="mb-3">
+              <label for="category" class="form-label">Category *</label>
+              <input type="text" class="form-control" id="category" required placeholder="e.g., Chair, Table, Sofa">
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="itemCondition" class="form-label">Condition *</label>
+              <select class="form-select" id="itemCondition" required>
+                <option value="">Select condition...</option>
+                <option value="New">New</option>
+                <option value="Like New">Like New</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Poor">Poor</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="price" class="form-label">Price *</label>
+              <input type="number" class="form-control" id="price" step="0.01" min="0" required>
+            </div>
+            <div class="mb-3">
+              <label for="stockQuantity" class="form-label">Stock Quantity *</label>
+              <input type="number" class="form-control" id="stockQuantity" min="0" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitFurnitureForm()">Add Furniture</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-5">
+    <div class="container">
+      <p class="mb-0">&copy; 2024 Campus ReHome - CollegeTown Furniture Platform | Roll Tide! 🐘</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+  
+  <script>
+    // Load furniture data
+
+    function displayFurniture(furniture) {
+      const tbody = document.getElementById('furnitureTableBody');
+      if (furniture.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No furniture found</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = furniture.map(item => `
+        <tr>
+          <td>${item.furniture_id}</td>
+          <td>${item.item_name}</td>
+          <td>${item.category}</td>
+          <td>${item.item_condition}</td>
+          <td>$${parseFloat(item.price).toFixed(2)}</td>
+          <td>${item.stock_quantity}</td>
+          <td>
+            <a href="./furniture.html" class="btn btn-sm btn-outline-primary">Edit</a>
+            <button onclick="deleteFurniture(${item.furniture_id})" class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function populateCategories(categories) {
+      const select = document.getElementById('categorySelect');
+      select.innerHTML = '<option value="">All Categories</option>';
+      
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      });
+    }
+
+    function filterFurniture() {
+      const search = document.getElementById('searchInput').value;
+      const category = document.getElementById('categorySelect').value;
+      loadFurniture(search, category);
+    }
+
+    function clearFilter() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('categorySelect').value = '';
+      loadFurniture('', '');
+    }
+
+    // Get API base URL
+    function getApiBaseUrl() {
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:5000/api';
+      }
+      return '/api';
+    }
+
+    async function loadFurniture(search = '', category = '') {
+      try {
+        let url = `${getApiBaseUrl()}/furniture?format=json`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (category) url += `&category=${encodeURIComponent(category)}`;
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data) {
+          console.warn('Unexpected API response:', data);
+          displayFurniture([]);
+          populateCategories([]);
+          return;
+        }
+        
+        displayFurniture(data.furniture || []);
+        populateCategories(data.categories || []);
+        
+        // Restore filter values
+        if (category) document.getElementById('categorySelect').value = category;
+      } catch (error) {
+        console.error('Error loading furniture:', error);
+        const errorMsg = window.location.protocol === 'file:' 
+          ? 'Cannot load data. Please start the server: cd api && dotnet run'
+          : 'Error loading furniture data. Check console for details.';
+        document.getElementById('furnitureTableBody').innerHTML = 
+          `<tr><td colspan="7" class="text-center text-danger">${errorMsg}</td></tr>`;
+      }
+    }
+
+    async function deleteFurniture(id) {
+      if (!confirm('Are you sure you want to delete this furniture item?')) return;
+      
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/furniture/${id}/delete`, {
+          method: 'POST'
+        });
+        
+        if (response.ok) {
+          loadFurniture(); // Reload the list
+        } else {
+          alert('Error deleting furniture item');
+        }
+      } catch (error) {
+        console.error('Error deleting furniture:', error);
+        alert('Error deleting furniture item');
+      }
+    }
+
+    async function submitFurnitureForm() {
+      const form = document.getElementById('addFurnitureForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const furnitureData = {
+        ItemName: document.getElementById('itemName').value,
+        Category: document.getElementById('category').value,
+        Description: document.getElementById('description').value || null,
+        ItemCondition: document.getElementById('itemCondition').value,
+        Price: parseFloat(document.getElementById('price').value),
+        StockQuantity: parseInt(document.getElementById('stockQuantity').value),
+        IsActive: true
+      };
+
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/furniture`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(furnitureData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        // Close modal and reset form
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addFurnitureModal'));
+        modal.hide();
+        form.reset();
+
+        // Reload furniture list
+        loadFurniture('', '');
+
+        // Show success message
+        alert('Furniture added successfully!');
+      } catch (error) {
+        console.error('Error adding furniture:', error);
+        alert('Error adding furniture: ' + error.message);
+      }
+    }
+
+    // Load on page load
+    loadFurniture('', '');
+  </script>
+</body>
+</html>
+
+

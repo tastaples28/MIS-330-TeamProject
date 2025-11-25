@@ -1,0 +1,243 @@
+/* Campus ReHome Custom Styles - Alabama Theme */
+
+:root {
+  --alabama-crimson: #9E1B32;
+  --alabama-crimson-dark: #7A1526;
+  --alabama-crimson-light: #C41E3A;
+  --alabama-white: #FFFFFF;
+  --alabama-gray: #767676;
+  --alabama-gray-light: #F5F5F5;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--alabama-gray-light);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+  flex: 1;
+}
+
+/* Navbar Styling */
+.navbar {
+  background-color: var(--alabama-crimson) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: var(--alabama-white) !important;
+}
+
+.navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
+  transition: all 0.3s;
+  margin: 0 0.25rem;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem !important;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  background-color: var(--alabama-crimson-dark);
+  color: var(--alabama-white) !important;
+}
+
+/* Card Styling */
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(158, 27, 50, 0.2);
+}
+
+.card-header {
+  background-color: var(--alabama-crimson);
+  color: var(--alabama-white);
+  font-weight: 600;
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+  padding: 1rem 1.5rem;
+}
+
+/* Button Styling */
+.btn-primary {
+  background-color: var(--alabama-crimson);
+  border-color: var(--alabama-crimson);
+  color: var(--alabama-white);
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--alabama-crimson-dark);
+  border-color: var(--alabama-crimson-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(158, 27, 50, 0.3);
+}
+
+.btn-outline-primary {
+  color: var(--alabama-crimson);
+  border-color: var(--alabama-crimson);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--alabama-crimson);
+  border-color: var(--alabama-crimson);
+  color: var(--alabama-white);
+}
+
+.btn-secondary {
+  background-color: var(--alabama-gray);
+  border-color: var(--alabama-gray);
+}
+
+.btn-danger {
+  transition: all 0.3s;
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+}
+
+/* Table Styling */
+.table-responsive {
+  border-radius: 0.5rem;
+  background-color: var(--alabama-white);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead {
+  background-color: var(--alabama-crimson);
+  color: var(--alabama-white);
+}
+
+.table thead th {
+  border: none;
+  font-weight: 600;
+  padding: 1rem;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(158, 27, 50, 0.05);
+}
+
+.table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+/* Form Styling */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--alabama-crimson);
+  box-shadow: 0 0 0 0.2rem rgba(158, 27, 50, 0.25);
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* Badge Styling */
+.badge {
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+}
+
+.badge.bg-success {
+  background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.badge.bg-secondary {
+  background-color: var(--alabama-gray) !important;
+}
+
+/* Page Headers */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--alabama-crimson);
+  font-weight: 600;
+}
+
+.page-header {
+  background: linear-gradient(135deg, var(--alabama-crimson) 0%, var(--alabama-crimson-dark) 100%);
+  color: var(--alabama-white);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  border-radius: 0.5rem;
+}
+
+/* Alert Styling */
+.alert {
+  border-radius: 0.5rem;
+  border: none;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Home Page Cards */
+.home-card {
+  height: 100%;
+  border-left: 4px solid var(--alabama-crimson);
+}
+
+.home-card .card-body {
+  padding: 2rem;
+}
+
+.home-card .card-title {
+  color: var(--alabama-crimson);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Footer */
+footer {
+  background-color: var(--alabama-crimson);
+  color: var(--alabama-white);
+  padding: 1.5rem 0;
+  margin-top: auto;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+}
+
+
+
+
