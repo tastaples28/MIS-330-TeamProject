@@ -56,13 +56,9 @@
             <h2 class="card-title text-center mb-4">Create Account</h2>
             
             <form id="registerForm">
-              <div class="mb-3">
-                <label class="form-label">Account Type *</label>
-                <select class="form-select" id="accountType" required>
-                  <option value="">Select account type...</option>
-                  <option value="customer">Customer</option>
-                  <option value="employee">Employee</option>
-                </select>
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> <strong>Customer Registration Only</strong><br>
+                <small>Only customers can create accounts here. Employees must be created by a manager through the employee portal.</small>
               </div>
               
               <div class="row">
@@ -86,22 +82,9 @@
                 <input type="tel" class="form-control" id="regPhone">
               </div>
               
-              <div id="employeeFields" style="display: none;">
-                <div class="mb-3">
-                  <label for="regRole" class="form-label">Role *</label>
-                  <input type="text" class="form-control" id="regRole" placeholder="e.g., Manager, Sales Associate">
-                </div>
-                <div class="mb-3">
-                  <label for="regHireDate" class="form-label">Hire Date</label>
-                  <input type="date" class="form-control" id="regHireDate">
-                </div>
-              </div>
-              
-              <div id="customerFields">
-                <div class="mb-3">
-                  <label for="regAddress" class="form-label">Address</label>
-                  <input type="text" class="form-control" id="regAddress">
-                </div>
+              <div class="mb-3">
+                <label for="regAddress" class="form-label">Address</label>
+                <input type="text" class="form-control" id="regAddress">
               </div>
               
               <div class="mb-3">
@@ -154,28 +137,6 @@
       return '/api';
     }
 
-    // Show/hide fields based on account type
-    document.getElementById('accountType').addEventListener('change', function() {
-      const accountType = this.value;
-      const employeeFields = document.getElementById('employeeFields');
-      const customerFields = document.getElementById('customerFields');
-      const roleField = document.getElementById('regRole');
-      
-      if (accountType === 'employee') {
-        employeeFields.style.display = 'block';
-        customerFields.style.display = 'none';
-        roleField.required = true;
-      } else if (accountType === 'customer') {
-        employeeFields.style.display = 'none';
-        customerFields.style.display = 'block';
-        roleField.required = false;
-      } else {
-        employeeFields.style.display = 'none';
-        customerFields.style.display = 'block';
-        roleField.required = false;
-      }
-    });
-
     document.getElementById('registerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -194,7 +155,8 @@
         return;
       }
       
-      const accountType = document.getElementById('accountType').value;
+      // Only customers can register
+      const accountType = 'customer';
       
       // Get form values and trim them
       const firstName = document.getElementById('regFirstName').value.trim();
@@ -231,21 +193,14 @@
         LastName: lastName,
         Email: email,
         Phone: phone || null,
-        UserPassword: password
+        UserPassword: password,
+        Address: address || null
       };
       
-      if (accountType === 'employee') {
-        formData.role = document.getElementById('regRole').value;
-        formData.hire_date = document.getElementById('regHireDate').value || null;
-        formData.is_active = true;
-      } else {
-        formData.address = address || null;
-      }
-      
-      console.log('Registration data being sent:', { ...formData, userpassword: '***' }); // Debug log
+      console.log('Registration data being sent:', { ...formData, UserPassword: '***' }); // Debug log
       
       try {
-        const endpoint = accountType === 'employee' ? 'employees' : 'customers';
+        const endpoint = 'customers';
         
         console.log('Sending registration data:', { ...formData, UserPassword: '***' }); // Debug
         

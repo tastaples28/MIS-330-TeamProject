@@ -28,16 +28,16 @@
           <li class="nav-item">
             <a class="nav-link" href="./index.html">Home</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" id="furnitureNavItem" style="display: none;">
             <a class="nav-link" href="./furniture.html">Furniture</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" id="customersNavItem" style="display: none;">
             <a class="nav-link" href="./customers.html">Customers</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" id="employeesNavItem" style="display: none;">
             <a class="nav-link" href="./employees.html">Employees</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" id="transactionsNavItem" style="display: none;">
             <a class="nav-link" href="./transactions.html">Transactions</a>
           </li>
           <li class="nav-item">
@@ -229,6 +229,20 @@
 
     if (!userToken || !userId || !userType) {
       window.location.href = './login.html';
+    }
+
+    // Show/hide employee-only navigation items
+    if (userType === 'employee') {
+      document.getElementById('furnitureNavItem').style.display = 'block';
+      document.getElementById('customersNavItem').style.display = 'block';
+      document.getElementById('employeesNavItem').style.display = 'block';
+      document.getElementById('transactionsNavItem').style.display = 'block';
+    } else {
+      // Hide employee-only links for customers
+      document.getElementById('furnitureNavItem').style.display = 'none';
+      document.getElementById('customersNavItem').style.display = 'none';
+      document.getElementById('employeesNavItem').style.display = 'none';
+      document.getElementById('transactionsNavItem').style.display = 'none';
     }
 
     // Load profile data

@@ -105,14 +105,47 @@
             <h5 class="mb-0">Payment Method</h5>
           </div>
           <div class="card-body">
-            <select class="form-select" id="paymentMethod" required>
-              <option value="">Select payment method...</option>
-              <option value="Cash">Cash (In-Store Pickup)</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="Debit Card">Debit Card</option>
-              <option value="Venmo">Venmo</option>
-              <option value="PayPal">PayPal</option>
-            </select>
+            <div class="mb-3">
+              <label class="form-label">Payment Method *</label>
+              <select class="form-select" id="paymentMethod" required onchange="togglePaymentFields()">
+                <option value="">Select payment method...</option>
+                <option value="Cash">Cash (In-Store Pickup)</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Debit Card">Debit Card</option>
+                <option value="Venmo">Venmo</option>
+                <option value="PayPal">PayPal</option>
+              </select>
+            </div>
+            
+            <!-- Card Payment Fields (shown for Credit/Debit Card) -->
+            <div id="cardPaymentFields" style="display: none;">
+              <div class="mb-3">
+                <label class="form-label">Card Number *</label>
+                <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)">
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Expiration Date *</label>
+                  <input type="text" class="form-control" id="cardExpiry" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">CVV *</label>
+                  <input type="text" class="form-control" id="cardCVV" placeholder="123" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Cardholder Name *</label>
+                <input type="text" class="form-control" id="cardholderName" placeholder="John Doe">
+              </div>
+            </div>
+            
+            <!-- Venmo/PayPal Fields -->
+            <div id="digitalPaymentFields" style="display: none;">
+              <div class="mb-3">
+                <label class="form-label" id="digitalPaymentLabel">Payment Account *</label>
+                <input type="text" class="form-control" id="digitalPaymentAccount" placeholder="Enter your account username or email">
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -182,21 +215,43 @@
         return;
       }
 
-      // Load user info
+      // Only customers can checkout
+      if (userType !== 'customer') {
+        alert('Only customers can place orders. Employees cannot purchase items.');
+        window.location.href = './index.html';
+        return;
+      }
+
+      // Load customer info and verify customer exists
       try {
-        const endpoint = userType === 'employee' ? 'employees' : 'customers';
-        const response = await fetch(`${getApiBaseUrl()}/${endpoint}/${userId}`);
-        if (response.ok) {
-          currentUser = await response.json();
-          // Pre-fill form
-          document.getElementById('checkoutFirstName').value = currentUser.first_name || currentUser.firstName || '';
-          document.getElementById('checkoutLastName').value = currentUser.last_name || currentUser.lastName || '';
-          document.getElementById('checkoutEmail').value = currentUser.email || '';
-          document.getElementById('checkoutPhone').value = currentUser.phone || currentUser.phone_number || '';
-          document.getElementById('checkoutAddress').value = currentUser.address || '';
+        const response = await fetch(`${getApiBaseUrl()}/customers/${userId}`);
+        if (!response.ok) {
+          alert('Customer account not found. Please login again.');
+          localStorage.clear();
+          window.location.href = './login.html';
+          return;
         }
+        currentUser = await response.json();
+        console.log('Loaded customer data:', currentUser); // Debug
+        // Store the actual customer_id for later use
+        if (currentUser.customer_id || currentUser.customerId) {
+          // Update localStorage with actual customer_id if different
+          const actualCustomerId = currentUser.customer_id || currentUser.customerId;
+          if (actualCustomerId.toString() !== userId) {
+            console.log('Updating userId in localStorage:', userId, '->', actualCustomerId);
+            localStorage.setItem('userId', actualCustomerId.toString());
+          }
+        }
+        // Pre-fill form
+        document.getElementById('checkoutFirstName').value = currentUser.first_name || currentUser.firstName || '';
+        document.getElementById('checkoutLastName').value = currentUser.last_name || currentUser.lastName || '';
+        document.getElementById('checkoutEmail').value = currentUser.email || '';
+        document.getElementById('checkoutPhone').value = currentUser.phone || currentUser.phone_number || '';
+        document.getElementById('checkoutAddress').value = currentUser.address || '';
       } catch (error) {
         console.error('Error loading user:', error);
+        alert('Error loading customer information. Please try again.');
+        return;
       }
 
       // Display cart items
@@ -234,6 +289,62 @@
       document.getElementById('total').textContent = '$' + total.toFixed(2);
     }
 
+    function togglePaymentFields() {
+      const paymentMethod = document.getElementById('paymentMethod').value;
+      const cardFields = document.getElementById('cardPaymentFields');
+      const digitalFields = document.getElementById('digitalPaymentFields');
+      
+      // Hide all fields first
+      cardFields.style.display = 'none';
+      digitalFields.style.display = 'none';
+      
+      // Clear required attributes
+      document.getElementById('cardNumber').required = false;
+      document.getElementById('cardExpiry').required = false;
+      document.getElementById('cardCVV').required = false;
+      document.getElementById('cardholderName').required = false;
+      document.getElementById('digitalPaymentAccount').required = false;
+      
+      // Show appropriate fields based on payment method
+      if (paymentMethod === 'Credit Card' || paymentMethod === 'Debit Card') {
+        cardFields.style.display = 'block';
+        document.getElementById('cardNumber').required = true;
+        document.getElementById('cardExpiry').required = true;
+        document.getElementById('cardCVV').required = true;
+        document.getElementById('cardholderName').required = true;
+      } else if (paymentMethod === 'Venmo' || paymentMethod === 'PayPal') {
+        digitalFields.style.display = 'block';
+        document.getElementById('digitalPaymentAccount').required = true;
+        const label = paymentMethod === 'Venmo' ? 'Venmo Username' : 'PayPal Email';
+        document.getElementById('digitalPaymentLabel').textContent = label + ' *';
+        document.getElementById('digitalPaymentAccount').placeholder = paymentMethod === 'Venmo' 
+          ? 'Enter your Venmo username' 
+          : 'Enter your PayPal email';
+      }
+    }
+
+    function formatCardNumber(input) {
+      // Remove all non-digits
+      let value = input.value.replace(/\D/g, '');
+      
+      // Add spaces every 4 digits
+      value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+      
+      input.value = value;
+    }
+
+    function formatExpiry(input) {
+      // Remove all non-digits
+      let value = input.value.replace(/\D/g, '');
+      
+      // Add slash after 2 digits
+      if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+      }
+      
+      input.value = value;
+    }
+
     async function submitOrder() {
       const form = document.getElementById('checkoutForm');
       if (!form.checkValidity()) {
@@ -247,6 +358,37 @@
         return;
       }
 
+      // Validate payment method specific fields
+      if (paymentMethod === 'Credit Card' || paymentMethod === 'Debit Card') {
+        const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+        const cardExpiry = document.getElementById('cardExpiry').value;
+        const cardCVV = document.getElementById('cardCVV').value;
+        const cardholderName = document.getElementById('cardholderName').value;
+        
+        if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
+          alert('Please enter a valid card number');
+          return;
+        }
+        if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+          alert('Please enter a valid expiration date (MM/YY)');
+          return;
+        }
+        if (!cardCVV || cardCVV.length < 3 || cardCVV.length > 4) {
+          alert('Please enter a valid CVV');
+          return;
+        }
+        if (!cardholderName || cardholderName.trim().length === 0) {
+          alert('Please enter the cardholder name');
+          return;
+        }
+      } else if (paymentMethod === 'Venmo' || paymentMethod === 'PayPal') {
+        const account = document.getElementById('digitalPaymentAccount').value;
+        if (!account || account.trim().length === 0) {
+          alert(`Please enter your ${paymentMethod} account information`);
+          return;
+        }
+      }
+
       if (shoppingCart.length === 0) {
         alert('Your cart is empty');
         return;
@@ -254,27 +396,69 @@
 
       const userId = localStorage.getItem('userId');
       const userType = localStorage.getItem('userType');
-      const employeeId = userType === 'employee' ? userId : null;
 
-      // Get first available employee if customer
-      let assignedEmployeeId = employeeId;
-      if (!assignedEmployeeId) {
+      // Only customers can place orders
+      if (userType !== 'customer') {
+        alert('Only customers can place orders.');
+        return;
+      }
+
+      // Use the customer data we already loaded, or fetch it again
+      let customerId;
+      if (currentUser && (currentUser.customer_id || currentUser.customerId)) {
+        customerId = currentUser.customer_id || currentUser.customerId;
+        console.log('Using customer_id from currentUser:', customerId);
+      } else {
+        // Fetch customer data if not already loaded
         try {
-          const empResponse = await fetch(`${getApiBaseUrl()}/employees?format=json`);
-          if (empResponse.ok) {
-            const empData = await empResponse.json();
-            const employees = empData.employees || [];
-            if (employees.length > 0) {
-              assignedEmployeeId = employees[0].employee_id || employees[0].employeeId;
-            }
+          const customerResponse = await fetch(`${getApiBaseUrl()}/customers/${userId}`);
+          if (!customerResponse.ok) {
+            throw new Error('Customer not found');
           }
+          const customer = await customerResponse.json();
+          customerId = customer.customer_id || customer.customerId;
+          console.log('Fetched customer_id:', customerId);
         } catch (error) {
-          console.error('Error getting employee:', error);
+          console.error('Error fetching customer:', error);
+          alert('Error verifying customer account. Please login again.');
+          window.location.href = './login.html';
+          return;
         }
+      }
+      
+      // Validate customerId
+      customerId = parseInt(customerId);
+      if (isNaN(customerId) || customerId === 0) {
+        console.error('Invalid customerId:', customerId, 'userId:', userId, 'currentUser:', currentUser);
+        alert('Invalid customer ID. Please login again.');
+        window.location.href = './login.html';
+        return;
+      }
+      
+      console.log('Final customer ID for transaction:', customerId);
+
+      // Get first available employee for the transaction
+      let assignedEmployeeId = null;
+      try {
+        const empResponse = await fetch(`${getApiBaseUrl()}/employees?format=json`);
+        if (empResponse.ok) {
+          const empData = await empResponse.json();
+          const employees = empData.employees || [];
+          // Find an active employee
+          const activeEmployee = employees.find(emp => emp.is_active !== false);
+          if (activeEmployee) {
+            assignedEmployeeId = activeEmployee.employee_id || activeEmployee.employeeId;
+          } else if (employees.length > 0) {
+            // Fallback to first employee if no active ones
+            assignedEmployeeId = employees[0].employee_id || employees[0].employeeId;
+          }
+        }
+      } catch (error) {
+        console.error('Error getting employee:', error);
       }
 
       if (!assignedEmployeeId) {
-        alert('Unable to process order. Please contact support.');
+        alert('Unable to process order. No employee available. Please contact support.');
         return;
       }
 
@@ -285,7 +469,7 @@
 
       // Create transaction
       const transactionData = {
-        CustomerId: parseInt(userId),
+        CustomerId: customerId,
         EmployeeId: parseInt(assignedEmployeeId),
         TransactionDate: new Date().toISOString().split('T')[0],
         TotalAmount: total,
@@ -312,12 +496,36 @@
           throw new Error(errorData.message || 'Failed to place order');
         }
 
+        const responseData = await response.json();
+        console.log('Transaction response:', responseData); // Debug
+        
+        // Try multiple ways to get the transaction ID
+        let transactionId = 'N/A';
+        if (responseData.transaction_id) {
+          transactionId = responseData.transaction_id;
+        } else if (responseData.transactionId) {
+          transactionId = responseData.transactionId;
+        } else if (responseData.TransactionId) {
+          transactionId = responseData.TransactionId;
+        } else if (responseData.id) {
+          transactionId = responseData.id;
+        } else {
+          // Try to extract from Location header
+          const location = response.headers.get('Location');
+          if (location) {
+            const match = location.match(/\/(\d+)$/);
+            if (match) {
+              transactionId = match[1];
+            }
+          }
+        }
+
         // Clear cart
         shoppingCart = [];
         localStorage.removeItem('shoppingCart');
 
         // Show success
-        alert('Order placed successfully! Your order number is: ' + (await response.json()).transaction_id);
+        alert('Order placed successfully! Your order number is: ' + transactionId);
         window.location.href = './index.html';
       } catch (error) {
         console.error('Error placing order:', error);

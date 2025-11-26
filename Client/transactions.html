@@ -96,6 +96,31 @@
     </div>
   </div>
 
+  <!-- View Transaction Modal -->
+  <div class="modal fade" id="viewTransactionModal" tabindex="-1" aria-labelledby="viewTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewTransactionModalLabel">Transaction Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="viewTransactionBody">
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" id="fulfillOrderBtn" onclick="fulfillOrder()" style="display: none;">
+            ✓ Fulfill Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Transaction Modal -->
   <div class="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -257,7 +282,7 @@
             <td>${transaction.payment_method}</td>
             <td><span class="badge ${statusClass} ${statusTextColor}">${transaction.status}</span></td>
             <td>
-              <a href="./transactions.html" class="btn btn-sm btn-outline-primary">View</a>
+              <button class="btn btn-sm btn-outline-primary" onclick="viewTransaction(${transaction.transaction_id})">View</button>
             </td>
           </tr>
         `;
@@ -389,6 +414,211 @@
       } catch (error) {
         console.error('Error creating transaction:', error);
         alert('Error creating transaction: ' + error.message);
+      }
+    }
+
+    let currentTransactionId = null;
+
+    async function viewTransaction(transactionId) {
+      console.log('Viewing transaction:', transactionId); // Debug
+      currentTransactionId = transactionId;
+      
+      const modalElement = document.getElementById('viewTransactionModal');
+      if (!modalElement) {
+        console.error('Modal element not found');
+        alert('Error: Modal not found. Please refresh the page.');
+        return;
+      }
+      
+      const modal = new bootstrap.Modal(modalElement);
+      const modalBody = document.getElementById('viewTransactionBody');
+      const fulfillBtn = document.getElementById('fulfillOrderBtn');
+      
+      // Show loading
+      modalBody.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+      fulfillBtn.style.display = 'none';
+      
+      try {
+        modal.show();
+      } catch (error) {
+        console.error('Error showing modal:', error);
+        // Try alternative method
+        const bsModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        bsModal.show();
+      }
+      
+      try {
+        const url = `${getApiBaseUrl()}/transactions/${transactionId}`;
+        console.log('Fetching transaction from:', url); // Debug
+        const response = await fetch(url);
+        console.log('Response status:', response.status); // Debug
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`Failed to load transaction: ${response.status} ${errorText}`);
+        }
+        
+        const transaction = await response.json();
+        console.log('Transaction data received:', transaction); // Debug
+        
+        // Format date - handle multiple date formats
+        let dateStr = 'N/A';
+        try {
+          const dateValue = transaction.transaction_date || transaction.transactionDate || transaction.TransactionDate;
+          if (dateValue) {
+            const date = new Date(dateValue);
+            dateStr = date.toLocaleDateString();
+          }
+        } catch (e) {
+          console.error('Error parsing date:', e);
+        }
+        
+        // Get customer name - handle multiple naming conventions
+        const customerFirstName = transaction.customer_first_name || transaction.customerFirstName || transaction.CustomerFirstName || '';
+        const customerLastName = transaction.customer_last_name || transaction.customerLastName || transaction.CustomerLastName || '';
+        const customerName = (customerFirstName + ' ' + customerLastName).trim() || 'N/A';
+        
+        // Get employee name - handle multiple naming conventions
+        const employeeFirstName = transaction.employee_first_name || transaction.employeeFirstName || transaction.EmployeeFirstName || '';
+        const employeeLastName = transaction.employee_last_name || transaction.employeeLastName || transaction.EmployeeLastName || '';
+        const employeeName = (employeeFirstName + ' ' + employeeLastName).trim() || 'N/A';
+        
+        // Get status - handle multiple naming conventions
+        const status = transaction.status || transaction.Status || 'N/A';
+        const statusClass = status === 'Completed' ? 'bg-success' : 
+                           status === 'Pending' ? 'bg-warning' : 'bg-secondary';
+        const statusTextColor = status === 'Pending' ? 'text-dark' : '';
+        
+        // Get transaction ID - handle multiple naming conventions
+        const transId = transaction.transaction_id || transaction.transactionId || transaction.TransactionId || 'N/A';
+        
+        // Get payment method - handle multiple naming conventions
+        const paymentMethod = transaction.payment_method || transaction.paymentMethod || transaction.PaymentMethod || 'N/A';
+        
+        // Get total amount - handle multiple naming conventions
+        const totalAmount = transaction.total_amount || transaction.totalAmount || transaction.TotalAmount || 0;
+        
+        // Build details HTML - handle multiple naming conventions
+        let detailsHtml = '';
+        const details = transaction.details || transaction.Details || [];
+        if (details && details.length > 0) {
+          detailsHtml = details.map(detail => {
+            const furnitureName = detail.furniture_name || detail.furnitureName || detail.FurnitureName || `Furniture ID: ${detail.furniture_id || detail.furnitureId || detail.FurnitureId}`;
+            const quantity = detail.quantity || detail.Quantity || 0;
+            const salePrice = detail.sale_price || detail.salePrice || detail.SalePrice || 0;
+            const subtotal = quantity * salePrice;
+            return `
+              <tr>
+                <td>${furnitureName}</td>
+                <td>${quantity}</td>
+                <td>$${parseFloat(salePrice).toFixed(2)}</td>
+                <td>$${parseFloat(subtotal).toFixed(2)}</td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          detailsHtml = '<tr><td colspan="4" class="text-center text-muted">No items found</td></tr>';
+        }
+        
+        modalBody.innerHTML = `
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Transaction ID:</strong> ${transId}
+            </div>
+            <div class="col-md-6">
+              <strong>Date:</strong> ${dateStr}
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Customer:</strong> ${customerName}
+            </div>
+            <div class="col-md-6">
+              <strong>Employee:</strong> ${employeeName}
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Payment Method:</strong> ${paymentMethod}
+            </div>
+            <div class="col-md-6">
+              <strong>Status:</strong> <span class="badge ${statusClass} ${statusTextColor}">${status}</span>
+            </div>
+          </div>
+          <hr>
+          <h6 class="mb-3">Order Items</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${detailsHtml}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="3" class="text-end">Total:</th>
+                  <th>$${parseFloat(totalAmount).toFixed(2)}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        `;
+        
+        // Show fulfill button only if status is Pending
+        if (status === 'Pending') {
+          fulfillBtn.style.display = 'block';
+        } else {
+          fulfillBtn.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error loading transaction:', error);
+        modalBody.innerHTML = `<div class="alert alert-danger">Error loading transaction: ${error.message}</div>`;
+      }
+    }
+
+    async function fulfillOrder() {
+      if (!currentTransactionId) {
+        alert('No transaction selected');
+        return;
+      }
+      
+      if (!confirm('Are you sure you want to mark this order as fulfilled (Completed)?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/transactions/${currentTransactionId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ Status: 'Completed' })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Failed to update transaction status');
+        }
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('viewTransactionModal'));
+        modal.hide();
+        
+        // Reload transactions list
+        loadTransactions();
+        
+        // Show success message
+        alert('Order fulfilled successfully!');
+      } catch (error) {
+        console.error('Error fulfilling order:', error);
+        alert('Error fulfilling order: ' + error.message);
       }
     }
 

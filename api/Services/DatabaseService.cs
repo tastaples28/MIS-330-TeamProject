@@ -485,7 +485,7 @@ public class DatabaseService
     public async Task<int> CreateTransactionAsync(Transaction transaction, List<TransactionDetail> details)
     {
         using var connection = await GetConnectionAsync();
-        await connection.OpenAsync();
+        // Connection is already open from GetConnectionAsync()
         using var trans = await connection.BeginTransactionAsync();
         
         try
@@ -534,6 +534,18 @@ public class DatabaseService
             await trans.RollbackAsync();
             throw;
         }
+    }
+
+    public async Task<bool> UpdateTransactionStatusAsync(int id, string status)
+    {
+        using var connection = await GetConnectionAsync();
+        var command = new MySqlCommand(
+            "UPDATE CustomerPurchaseTransaction SET status = @status WHERE transaction_id = @id",
+            connection);
+        command.Parameters.AddWithValue("@id", id);
+        command.Parameters.AddWithValue("@status", status);
+        
+        return await command.ExecuteNonQueryAsync() > 0;
     }
 }
 

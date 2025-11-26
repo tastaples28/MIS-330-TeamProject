@@ -60,7 +60,7 @@
         <h1 class="mb-2">👔 Employees</h1>
         <p class="text-muted mb-0">Manage employee records</p>
       </div>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+      <button type="button" class="btn btn-primary" id="addEmployeeBtn" data-bs-toggle="modal" data-bs-target="#addEmployeeModal" style="display: none;">
         <span>+</span> Add New Employee
       </button>
     </div>
@@ -252,40 +252,13 @@
       }
     }
 
-    function displayEmployees(employees) {
-      const tbody = document.getElementById('employeesTableBody');
-      if (employees.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">No employees found</td></tr>';
+    async function deactivateEmployee(id) {
+      // Check if user is a manager/admin
+      if (!isManagerUser) {
+        alert('Only managers and administrators can deactivate employee accounts.');
         return;
       }
-      
-      tbody.innerHTML = employees.map(employee => {
-        const hireDate = employee.hire_date ? new Date(employee.hire_date).toLocaleDateString() : '-';
-        const statusBadge = employee.is_active 
-          ? '<span class="badge bg-success">Active</span>'
-          : '<span class="badge bg-secondary">Inactive</span>';
-        const firstName = employee.first_name || 'N/A';
-        const lastName = employee.last_name || 'N/A';
-        return `
-          <tr>
-            <td>${employee.employee_id}</td>
-            <td>${firstName}</td>
-            <td>${lastName}</td>
-            <td>${employee.email || '-'}</td>
-            <td>${employee.phone_number || '-'}</td>
-            <td>${employee.role || '-'}</td>
-            <td>${hireDate}</td>
-            <td>${statusBadge}</td>
-            <td>
-              <button onclick="openEditEmployeeModal(${employee.employee_id})" class="btn btn-sm btn-outline-primary">Edit</button>
-              <button onclick="deactivateEmployee(${employee.employee_id})" class="btn btn-sm btn-outline-danger">Deactivate</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
 
-    async function deactivateEmployee(id) {
       if (!confirm('Are you sure you want to deactivate this employee?')) return;
       
       try {
@@ -305,6 +278,7 @@
     }
 
     async function submitEmployeeForm() {
+      // All employees can create employee accounts
       const form = document.getElementById('addEmployeeForm');
       if (!form.checkValidity()) {
         form.reportValidity();
@@ -374,6 +348,12 @@
     let currentEmployeePassword = '';
 
     async function openEditEmployeeModal(id) {
+      // Check if user is a manager/admin
+      if (!isManagerUser) {
+        alert('Only managers and administrators can edit employee accounts.');
+        return;
+      }
+
       try {
         const response = await fetch(`${getApiBaseUrl()}/employees/${id}`);
         if (!response.ok) {
@@ -406,6 +386,12 @@
     }
 
     async function submitEditEmployee() {
+      // Check if user is a manager/admin
+      if (!isManagerUser) {
+        alert('Only managers and administrators can edit employee accounts.');
+        return;
+      }
+
       const form = document.getElementById('editEmployeeForm');
       // Remove password requirement temporarily
       const passwordField = document.getElementById('editEmpPassword');
@@ -458,7 +444,98 @@
       }
     }
 
+    // Global variable to track if user is manager/admin
+    let isManagerUser = false;
+
+    // Check if user is a manager/admin and show/hide add button
+    function checkManagerAccess() {
+      const userToken = localStorage.getItem('userToken');
+      const userType = localStorage.getItem('userType');
+      const isAdmin = localStorage.getItem('isAdmin');
+      const userId = localStorage.getItem('userId');
+      
+      if (!userToken || userType !== 'employee') {
+        // Not logged in as employee - redirect or hide everything
+        document.getElementById('addEmployeeBtn').style.display = 'none';
+        isManagerUser = false;
+        return;
+      }
+      
+      // Check if user is manager/admin
+      if (isAdmin === 'true') {
+        document.getElementById('addEmployeeBtn').style.display = 'block';
+        isManagerUser = true;
+        return;
+      }
+      
+      // Also check role from employee data
+      if (userId) {
+        fetch(`${getApiBaseUrl()}/employees/${userId}`)
+          .then(res => res.json())
+          .then(employee => {
+            const role = (employee.role || '').toLowerCase();
+            if (role.includes('admin') || role.includes('manager')) {
+              document.getElementById('addEmployeeBtn').style.display = 'block';
+              localStorage.setItem('isAdmin', 'true');
+              isManagerUser = true;
+              // Reload employees to show edit buttons
+              loadEmployees();
+            } else {
+              // Allow all employees to create employees, but restrict edit/delete to managers
+              document.getElementById('addEmployeeBtn').style.display = 'block';
+              isManagerUser = false;
+            }
+          })
+          .catch(() => {
+            // On error, still allow creating employees
+            document.getElementById('addEmployeeBtn').style.display = 'block';
+            isManagerUser = false;
+          });
+      } else {
+        // If no userId, still allow creating employees if logged in as employee
+        document.getElementById('addEmployeeBtn').style.display = 'block';
+        isManagerUser = false;
+      }
+    }
+
+    function displayEmployees(employees) {
+      const tbody = document.getElementById('employeesTableBody');
+      if (employees.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">No employees found</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = employees.map(employee => {
+        const hireDate = employee.hire_date ? new Date(employee.hire_date).toLocaleDateString() : '-';
+        const statusBadge = employee.is_active 
+          ? '<span class="badge bg-success">Active</span>'
+          : '<span class="badge bg-secondary">Inactive</span>';
+        const firstName = employee.first_name || 'N/A';
+        const lastName = employee.last_name || 'N/A';
+        const actionButtons = isManagerUser 
+          ? `
+            <button onclick="openEditEmployeeModal(${employee.employee_id})" class="btn btn-sm btn-outline-primary">Edit</button>
+            <button onclick="deactivateEmployee(${employee.employee_id})" class="btn btn-sm btn-outline-danger">Deactivate</button>
+          `
+          : '<span class="text-muted">View Only</span>';
+        return `
+          <tr>
+            <td>${employee.employee_id}</td>
+            <td>${firstName}</td>
+            <td>${lastName}</td>
+            <td>${employee.email || '-'}</td>
+            <td>${employee.phone_number || '-'}</td>
+            <td>${employee.role || '-'}</td>
+            <td>${hireDate}</td>
+            <td>${statusBadge}</td>
+            <td>${actionButtons}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
     loadEmployees();
+    checkManagerAccess();
   </script>
 </body>
 </html>
