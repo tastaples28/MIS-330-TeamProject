@@ -15,6 +15,65 @@
   
   <!-- Custom CSS -->
   <link rel="stylesheet" href="./styles/main.css" />
+  <style>
+    /* Force hide employee navigation items by default - highest priority */
+    #furnitureNavItem,
+    #customersNavItem,
+    #employeesNavItem,
+    #transactionsNavItem {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+      position: absolute !important;
+      left: -9999px !important;
+    }
+    
+    /* Only show for employees when body has employee-user class */
+    body.employee-user #furnitureNavItem,
+    body.employee-user #customersNavItem,
+    body.employee-user #employeesNavItem,
+    body.employee-user #transactionsNavItem {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      height: auto !important;
+      width: auto !important;
+      overflow: visible !important;
+      position: static !important;
+      left: auto !important;
+    }
+  </style>
+  <script>
+    // Run immediately - before page renders
+    (function() {
+      // Get user type from localStorage immediately
+      const userType = localStorage.getItem('userType');
+      
+      // If not an employee, ensure nav items are never shown
+      if (!userType || userType.toLowerCase() !== 'employee') {
+        // Add CSS to permanently hide
+        const style = document.createElement('style');
+        style.textContent = `
+          #furnitureNavItem,
+          #customersNavItem,
+          #employeesNavItem,
+          #transactionsNavItem {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    })();
+  </script>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark">
@@ -26,25 +85,19 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link" href="./index.html">Home</a>
-          </li>
-          <li class="nav-item" id="furnitureNavItem" style="display: none;">
-            <a class="nav-link" href="./furniture.html">Furniture</a>
-          </li>
-          <li class="nav-item" id="customersNavItem" style="display: none;">
-            <a class="nav-link" href="./customers.html">Customers</a>
-          </li>
-          <li class="nav-item" id="employeesNavItem" style="display: none;">
-            <a class="nav-link" href="./employees.html">Employees</a>
-          </li>
-          <li class="nav-item" id="transactionsNavItem" style="display: none;">
-            <a class="nav-link" href="./transactions.html">Transactions</a>
+            <a class="nav-link" href="./index.html">
+              <i class="bi bi-house"></i> Home
+            </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="./profile.html">Profile</a>
+            <a class="nav-link active" href="./profile.html">
+              <i class="bi bi-person-circle"></i> Profile
+            </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" onclick="logout()">Logout</a>
+            <a class="nav-link" href="#" onclick="logout()">
+              <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
           </li>
         </ul>
       </div>
@@ -231,18 +284,67 @@
       window.location.href = './login.html';
     }
 
-    // Show/hide employee-only navigation items
-    if (userType === 'employee') {
-      document.getElementById('furnitureNavItem').style.display = 'block';
-      document.getElementById('customersNavItem').style.display = 'block';
-      document.getElementById('employeesNavItem').style.display = 'block';
-      document.getElementById('transactionsNavItem').style.display = 'block';
+    // Add employee navigation items ONLY if user is an employee
+    console.log('User Type:', userType); // Debug log
+    
+    // First, ensure any existing employee nav items are removed
+    const existingFurniture = document.getElementById('furnitureNavItem');
+    const existingCustomers = document.getElementById('customersNavItem');
+    const existingEmployees = document.getElementById('employeesNavItem');
+    const existingTransactions = document.getElementById('transactionsNavItem');
+    
+    if (existingFurniture) existingFurniture.remove();
+    if (existingCustomers) existingCustomers.remove();
+    if (existingEmployees) existingEmployees.remove();
+    if (existingTransactions) existingTransactions.remove();
+    
+    // Only add them back if user is explicitly an employee
+    if (userType && userType.toLowerCase() === 'employee') {
+      console.log('Employee user - adding employee nav items');
+      
+      // Add the nav items for employees
+      const navList = document.querySelector('.navbar-nav.ms-auto');
+      if (navList) {
+        const homeItem = navList.querySelector('li:first-child');
+        if (homeItem) {
+          const furnitureNav = document.createElement('li');
+          furnitureNav.className = 'nav-item';
+          furnitureNav.id = 'furnitureNavItem';
+          furnitureNav.innerHTML = '<a class="nav-link" href="./furniture.html"><i class="bi bi-furniture"></i> Furniture</a>';
+          homeItem.after(furnitureNav);
+          
+          const customersNav = document.createElement('li');
+          customersNav.className = 'nav-item';
+          customersNav.id = 'customersNavItem';
+          customersNav.innerHTML = '<a class="nav-link" href="./customers.html"><i class="bi bi-people"></i> Customers</a>';
+          furnitureNav.after(customersNav);
+          
+          const employeesNav = document.createElement('li');
+          employeesNav.className = 'nav-item';
+          employeesNav.id = 'employeesNavItem';
+          employeesNav.innerHTML = '<a class="nav-link" href="./employees.html"><i class="bi bi-person-badge"></i> Employees</a>';
+          customersNav.after(employeesNav);
+          
+          const transactionsNav = document.createElement('li');
+          transactionsNav.className = 'nav-item';
+          transactionsNav.id = 'transactionsNavItem';
+          transactionsNav.innerHTML = '<a class="nav-link" href="./transactions.html"><i class="bi bi-receipt"></i> Transactions</a>';
+          employeesNav.after(transactionsNav);
+        }
+      }
     } else {
-      // Hide employee-only links for customers
-      document.getElementById('furnitureNavItem').style.display = 'none';
-      document.getElementById('customersNavItem').style.display = 'none';
-      document.getElementById('employeesNavItem').style.display = 'none';
-      document.getElementById('transactionsNavItem').style.display = 'none';
+      console.log('Customer user - employee nav items will NOT be added');
+      // Double-check: remove any that might exist
+      setTimeout(() => {
+        const checkFurniture = document.getElementById('furnitureNavItem');
+        const checkCustomers = document.getElementById('customersNavItem');
+        const checkEmployees = document.getElementById('employeesNavItem');
+        const checkTransactions = document.getElementById('transactionsNavItem');
+        if (checkFurniture) checkFurniture.remove();
+        if (checkCustomers) checkCustomers.remove();
+        if (checkEmployees) checkEmployees.remove();
+        if (checkTransactions) checkTransactions.remove();
+      }, 100);
     }
 
     // Load profile data

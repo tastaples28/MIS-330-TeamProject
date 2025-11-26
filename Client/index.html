@@ -42,6 +42,12 @@
       justify-content: center;
       font-size: 4rem;
       color: #667eea;
+      border-radius: 1rem 1rem 0 0;
+      transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover .product-image {
+      transform: scale(1.05);
     }
     .price-tag {
       font-size: 1.5rem;
@@ -68,16 +74,25 @@
       justify-content: center;
     }
     .category-badge {
-      background: #e9ecef;
+      background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
       color: #495057;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
+      padding: 0.375rem 0.875rem;
+      border-radius: 50px;
       font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stock-badge {
+      border-radius: 50px;
+      padding: 0.5rem 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
       <a class="navbar-brand fw-bold" href="./index.html">
         <i class="bi bi-house-door"></i> Campus ReHome
@@ -115,11 +130,6 @@
           <li class="nav-item" id="adminMenu" style="display: none;">
             <a class="nav-link" href="./admin.html">
               <i class="bi bi-shield-check"></i> Admin
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./employee-login.html">
-              <i class="bi bi-briefcase"></i> Employee Login
             </a>
           </li>
         </ul>
@@ -449,7 +459,7 @@
         const grid = document.getElementById('productsGrid');
         grid.innerHTML = products.map(item => `
           <div class="col-md-6 col-lg-4">
-            <div class="card product-card shadow-sm">
+            <div class="card product-card shadow-sm rounded-4 overflow-hidden">
               <div class="position-relative">
                 <div class="product-image">
                   ${getFurnitureIcon(item.category)}
@@ -465,7 +475,7 @@
                 <p class="card-text text-muted small">${item.description || 'Quality furniture for your space'}</p>
                 <div class="d-flex justify-content-between align-items-center mt-3">
                   <span class="price-tag">$${parseFloat(item.price).toFixed(2)}</span>
-                  <button class="btn btn-primary" 
+                  <button class="btn btn-primary rounded-pill" 
                           onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})"
                           ${item.stock_quantity === 0 ? 'disabled' : ''}>
                     <i class="bi bi-cart-plus"></i> Add to Cart

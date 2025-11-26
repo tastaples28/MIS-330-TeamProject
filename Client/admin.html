@@ -46,17 +46,19 @@
 </head>
 <body>
   <!-- Admin Navigation -->
-  <nav class="navbar navbar-dark bg-dark">
+  <nav class="navbar navbar-dark">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold" href="./admin.html">
-        <i class="bi bi-shield-check"></i> Admin Dashboard
+        <i class="bi bi-shield-check-fill"></i> Employee Dashboard
       </a>
-      <div class="d-flex align-items-center">
-        <span class="text-light me-3" id="adminName">Admin</span>
-        <a href="./index.html" class="btn btn-outline-light btn-sm me-2">
+      <div class="d-flex align-items-center gap-3">
+        <span class="text-light me-2 px-3 py-2 rounded-pill bg-light bg-opacity-10" id="adminName">
+          <i class="bi bi-person-badge"></i> Admin
+        </span>
+        <a href="./index.html" class="btn btn-outline-light btn-sm rounded-pill">
           <i class="bi bi-shop"></i> View Store
         </a>
-        <button class="btn btn-outline-light btn-sm" onclick="logout()">
+        <button class="btn btn-outline-light btn-sm rounded-pill" onclick="logout()">
           <i class="bi bi-box-arrow-right"></i> Logout
         </button>
       </div>
@@ -105,7 +107,7 @@
           <!-- Stats Cards -->
           <div class="row g-4 mb-4">
             <div class="col-md-3">
-              <div class="card stat-card border-primary">
+              <div class="card stat-card border-primary shadow-sm rounded-4">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -118,7 +120,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card stat-card border-success">
+              <div class="card stat-card border-success shadow-sm rounded-4">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -131,7 +133,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card stat-card border-info">
+              <div class="card stat-card border-info shadow-sm rounded-4">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -144,7 +146,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card stat-card border-warning">
+              <div class="card stat-card border-warning shadow-sm rounded-4">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -159,24 +161,24 @@
           </div>
 
           <!-- Quick Actions -->
-          <div class="card">
+          <div class="card shadow-sm rounded-4">
             <div class="card-header">
-              <h5 class="mb-0">Quick Actions</h5>
+              <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Quick Actions</h5>
             </div>
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-md-4">
-                  <a href="./furniture.html" class="btn btn-outline-primary w-100">
+                  <a href="./furniture.html" class="btn btn-outline-primary w-100 rounded-pill">
                     <i class="bi bi-plus-circle"></i> Add New Furniture
                   </a>
                 </div>
                 <div class="col-md-4">
-                  <a href="./customers.html" class="btn btn-outline-success w-100">
+                  <a href="./customers.html" class="btn btn-outline-success w-100 rounded-pill">
                     <i class="bi bi-person-plus"></i> Add New Customer
                   </a>
                 </div>
                 <div class="col-md-4">
-                  <a href="./employees.html" class="btn btn-outline-info w-100">
+                  <a href="./employees.html" class="btn btn-outline-info w-100 rounded-pill">
                     <i class="bi bi-person-badge"></i> Add New Employee
                   </a>
                 </div>
@@ -193,10 +195,11 @@
               <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
             </a>
           </div>
-          <div class="card">
-            <div class="card-body">
-              <p class="text-muted">Full furniture management with CRUD operations available at:</p>
-              <a href="./furniture.html" class="btn btn-primary">
+          <div class="card shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+              <i class="bi bi-furniture" style="font-size: 4rem; color: var(--alabama-crimson); margin-bottom: 1rem;"></i>
+              <p class="text-muted mb-4">Full furniture management with CRUD operations available at:</p>
+              <a href="./furniture.html" class="btn btn-primary rounded-pill px-4">
                 <i class="bi bi-furniture"></i> Go to Furniture Management
               </a>
             </div>
@@ -207,14 +210,15 @@
         <div id="customersSection" class="content-section" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Customer Management</h2>
-            <a href="./customers.html" class="btn btn-outline-primary" target="_blank">
+            <a href="./customers.html" class="btn btn-outline-primary rounded-pill" target="_blank">
               <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
             </a>
           </div>
-          <div class="card">
-            <div class="card-body">
-              <p class="text-muted">Full customer management with CRUD operations available at:</p>
-              <a href="./customers.html" class="btn btn-primary">
+          <div class="card shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+              <i class="bi bi-people" style="font-size: 4rem; color: var(--alabama-crimson); margin-bottom: 1rem;"></i>
+              <p class="text-muted mb-4">Full customer management with CRUD operations available at:</p>
+              <a href="./customers.html" class="btn btn-primary rounded-pill px-4">
                 <i class="bi bi-people"></i> Go to Customer Management
               </a>
             </div>
@@ -225,14 +229,15 @@
         <div id="employeesSection" class="content-section" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Employee Management</h2>
-            <a href="./employees.html" class="btn btn-outline-primary" target="_blank">
+            <a href="./employees.html" class="btn btn-outline-primary rounded-pill" target="_blank">
               <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
             </a>
           </div>
-          <div class="card">
-            <div class="card-body">
-              <p class="text-muted">Full employee management with CRUD operations available at:</p>
-              <a href="./employees.html" class="btn btn-primary">
+          <div class="card shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+              <i class="bi bi-person-badge" style="font-size: 4rem; color: var(--alabama-crimson); margin-bottom: 1rem;"></i>
+              <p class="text-muted mb-4">Full employee management with CRUD operations available at:</p>
+              <a href="./employees.html" class="btn btn-primary rounded-pill px-4">
                 <i class="bi bi-person-badge"></i> Go to Employee Management
               </a>
             </div>
@@ -243,14 +248,15 @@
         <div id="transactionsSection" class="content-section" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Transaction Management</h2>
-            <a href="./transactions.html" class="btn btn-outline-primary" target="_blank">
+            <a href="./transactions.html" class="btn btn-outline-primary rounded-pill" target="_blank">
               <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
             </a>
           </div>
-          <div class="card">
-            <div class="card-body">
-              <p class="text-muted">Full transaction management available at:</p>
-              <a href="./transactions.html" class="btn btn-primary">
+          <div class="card shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+              <i class="bi bi-receipt" style="font-size: 4rem; color: var(--alabama-crimson); margin-bottom: 1rem;"></i>
+              <p class="text-muted mb-4">Full transaction management available at:</p>
+              <a href="./transactions.html" class="btn btn-primary rounded-pill px-4">
                 <i class="bi bi-receipt"></i> Go to Transaction Management
               </a>
             </div>
