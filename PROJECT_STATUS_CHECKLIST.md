@@ -35,25 +35,25 @@
 - [x] Transactions page - Created with table and add form
 - [x] Navigation menu - Bootstrap navbar on all pages
 - [x] Responsive design - Bootstrap 5 used throughout
-- [ ] Login page - Not found
-- [ ] Registration page - Not found
-- [ ] User profile page - Not found
+- [x] Login page - Created with customer/employee login
+- [x] Registration page - Created with customer/employee registration
+- [x] User profile page - Created with view/edit functionality
 
 ## User Management Features
-- [ ] User registration page - Not implemented
-- [ ] User login page - Not implemented
-- [ ] Authentication system - No login/logout functionality
-- [ ] Session management - Not implemented
-- [ ] Password hashing - Passwords stored as plaintext (security issue)
+- [x] User registration page - Implemented with customer/employee registration
+- [x] User login page - Implemented with customer/employee login
+- [x] Authentication system - Login/logout with localStorage token management
+- [x] Session management - Client-side session using localStorage
+- [ ] Password hashing - Passwords stored as plaintext (security issue - needs improvement)
 - [x] Customer CRUD operations - Create, Read, Delete implemented
 - [x] Employee CRUD operations - Create, Read, Deactivate implemented
-- [ ] User profiles - No profile viewing/editing page
-- [ ] Password reset - Not implemented
+- [x] User profiles - Profile viewing/editing page with modals
+- [ ] Password reset - Not implemented (password change available in profile)
 
 ## Furniture Listing & Management Features
 - [x] Create furniture listing - Modal form with all fields
 - [x] Read furniture listings - Table displays all active furniture
-- [ ] Edit furniture listing - Edit button exists but no edit form/modal
+- [x] Edit furniture listing - Edit modal with pre-filled form implemented
 - [x] Delete furniture listing - Soft delete (sets is_active = false)
 - [x] Furniture detail view - Data displayed in table
 - [x] Category management - Categories stored and filterable
@@ -87,25 +87,3 @@
 - [ ] Inventory reports - Not implemented
 - [ ] Stock adjustment (manual) - Not implemented
 - [x] Soft delete for inventory - is_active flag prevents showing deleted items
-
-## Backend API Implementation
-- [x] REST API structure - Controllers for all entities
-- [x] Customer API endpoints - GET, POST, PUT, DELETE
-- [x] Employee API endpoints - GET, POST, PUT, DELETE
-- [x] Furniture API endpoints - GET, POST, PUT, DELETE with search/filter
-- [x] Transaction API endpoints - GET, POST with details
-- [x] Database service layer - DatabaseService with all CRUD methods
-- [x] Error handling - Try-catch blocks in frontend
-- [x] JSON serialization - Snake_case naming for API responses
-- [ ] Authentication middleware - Not implemented
-- [ ] Input validation - Basic HTML5 validation, no server-side validation
-
-## Additional Features
-- [x] Bootstrap UI framework - Bootstrap 5.3.3 via CDN
-- [x] Responsive design - Mobile-friendly layout
-- [x] Modal forms - All add operations use Bootstrap modals
-- [x] Error messages - User-friendly error display
-- [x] Success notifications - Alert messages after operations
-- [ ] Data export - Not implemented
-- [ ] Reports/dashboard - Basic stats placeholders on home page (not functional)
-

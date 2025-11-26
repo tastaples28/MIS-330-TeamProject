@@ -40,6 +40,15 @@
           <li class="nav-item">
             <a class="nav-link active" href="./transactions.html">Transactions</a>
           </li>
+          <li class="nav-item" id="loginNavItem">
+            <a class="nav-link" href="./login.html">Login</a>
+          </li>
+          <li class="nav-item" id="profileNavItem" style="display: none;">
+            <a class="nav-link" href="./profile.html">Profile</a>
+          </li>
+          <li class="nav-item" id="logoutNavItem" style="display: none;">
+            <a class="nav-link" href="#" onclick="logout(); return false;">Logout</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -236,12 +245,14 @@
         const statusClass = transaction.status === 'Completed' ? 'bg-success' : 
                            transaction.status === 'Pending' ? 'bg-warning' : 'bg-secondary';
         const statusTextColor = transaction.status === 'Pending' ? 'text-dark' : '';
+        const customerName = (transaction.customer_first_name || '') + ' ' + (transaction.customer_last_name || '').trim() || 'N/A';
+        const employeeName = (transaction.employee_first_name || '') + ' ' + (transaction.employee_last_name || '').trim() || 'N/A';
         return `
           <tr>
             <td>${transaction.transaction_id}</td>
             <td>${date}</td>
-            <td>${transaction.customer_first_name} ${transaction.customer_last_name}</td>
-            <td>${transaction.employee_first_name} ${transaction.employee_last_name}</td>
+            <td>${customerName}</td>
+            <td>${employeeName}</td>
             <td>$${parseFloat(transaction.total_amount).toFixed(2)}</td>
             <td>${transaction.payment_method}</td>
             <td><span class="badge ${statusClass} ${statusTextColor}">${transaction.status}</span></td>
@@ -379,6 +390,25 @@
         console.error('Error creating transaction:', error);
         alert('Error creating transaction: ' + error.message);
       }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
+        window.location.href = './index.html';
+      }
+    }
+
+    // Update navigation based on login status
+    const userToken = localStorage.getItem('userToken');
+    if (userToken) {
+      document.getElementById('loginNavItem').style.display = 'none';
+      document.getElementById('profileNavItem').style.display = 'block';
+      document.getElementById('logoutNavItem').style.display = 'block';
     }
 
     loadTransactions();

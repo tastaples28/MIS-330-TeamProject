@@ -41,3 +41,4 @@ C:\Users\tasta\Downloads\MIS-330-TeamProject\api\obj\Debug\net8.0\refint\CampusR
 C:\Users\tasta\Downloads\MIS-330-TeamProject\api\obj\Debug\net8.0\CampusReHome.pdb
 C:\Users\tasta\Downloads\MIS-330-TeamProject\api\obj\Debug\net8.0\CampusReHome.genruntimeconfig.cache
 C:\Users\tasta\Downloads\MIS-330-TeamProject\api\obj\Debug\net8.0\ref\CampusReHome.dll
+C:\Users\tasta\Downloads\MIS-330-TeamProject\api\obj\Debug\net8.0\CampusReHome.sourcelink.json

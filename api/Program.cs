@@ -78,6 +78,9 @@ app.MapGet("/customers", async (HttpContext context) => await ServeHtmlFile(cont
 app.MapGet("/furniture", async (HttpContext context) => await ServeHtmlFile(context, "furniture.html", contentRoot));
 app.MapGet("/employees", async (HttpContext context) => await ServeHtmlFile(context, "employees.html", contentRoot));
 app.MapGet("/transactions", async (HttpContext context) => await ServeHtmlFile(context, "transactions.html", contentRoot));
+app.MapGet("/login", async (HttpContext context) => await ServeHtmlFile(context, "login.html", contentRoot));
+app.MapGet("/register", async (HttpContext context) => await ServeHtmlFile(context, "register.html", contentRoot));
+app.MapGet("/profile", async (HttpContext context) => await ServeHtmlFile(context, "profile.html", contentRoot));
 
 // 3. API controllers (for /api/* routes)
 app.MapControllers();
@@ -87,6 +90,9 @@ app.MapGet("/customers/{*path}", async (HttpContext context) => await ServeHtmlF
 app.MapGet("/furniture/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "furniture.html", contentRoot));
 app.MapGet("/employees/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "employees.html", contentRoot));
 app.MapGet("/transactions/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "transactions.html", contentRoot));
+app.MapGet("/login/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "login.html", contentRoot));
+app.MapGet("/register/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "register.html", contentRoot));
+app.MapGet("/profile/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "profile.html", contentRoot));
 
 app.Run();
 

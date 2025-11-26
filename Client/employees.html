@@ -40,6 +40,15 @@
           <li class="nav-item">
             <a class="nav-link" href="./transactions.html">Transactions</a>
           </li>
+          <li class="nav-item" id="loginNavItem">
+            <a class="nav-link" href="./login.html">Login</a>
+          </li>
+          <li class="nav-item" id="profileNavItem" style="display: none;">
+            <a class="nav-link" href="./profile.html">Profile</a>
+          </li>
+          <li class="nav-item" id="logoutNavItem" style="display: none;">
+            <a class="nav-link" href="#" onclick="logout(); return false;">Logout</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -136,6 +145,64 @@
     </div>
   </div>
 
+  <!-- Edit Employee Modal -->
+  <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editEmployeeModalLabel">Edit Employee</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editEmployeeForm">
+            <input type="hidden" id="editEmployeeId">
+            <div class="mb-3">
+              <label for="editEmpFirstName" class="form-label">First Name *</label>
+              <input type="text" class="form-control" id="editEmpFirstName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editEmpLastName" class="form-label">Last Name *</label>
+              <input type="text" class="form-control" id="editEmpLastName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editEmpEmail" class="form-label">Email *</label>
+              <input type="email" class="form-control" id="editEmpEmail" required>
+            </div>
+            <div class="mb-3">
+              <label for="editEmpPhone" class="form-label">Phone</label>
+              <input type="tel" class="form-control" id="editEmpPhone">
+            </div>
+            <div class="mb-3">
+              <label for="editEmpPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="editEmpPassword" placeholder="Leave blank to keep existing password">
+              <small class="text-muted">Enter new password or leave blank to keep existing</small>
+            </div>
+            <div class="mb-3">
+              <label for="editEmpRole" class="form-label">Role *</label>
+              <input type="text" class="form-control" id="editEmpRole" required placeholder="e.g., Manager, Sales Associate">
+            </div>
+            <div class="mb-3">
+              <label for="editEmpHireDate" class="form-label">Hire Date</label>
+              <input type="date" class="form-control" id="editEmpHireDate">
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="editEmpIsActive" checked>
+                <label class="form-check-label" for="editEmpIsActive">
+                  Active
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitEditEmployee()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="mt-5">
     <div class="container">
       <p class="mb-0">&copy; 2024 Campus ReHome - CollegeTown Furniture Platform | Roll Tide! 🐘</p>
@@ -197,18 +264,20 @@
         const statusBadge = employee.is_active 
           ? '<span class="badge bg-success">Active</span>'
           : '<span class="badge bg-secondary">Inactive</span>';
+        const firstName = employee.first_name || 'N/A';
+        const lastName = employee.last_name || 'N/A';
         return `
           <tr>
             <td>${employee.employee_id}</td>
-            <td>${employee.first_name}</td>
-            <td>${employee.last_name}</td>
-            <td>${employee.email}</td>
+            <td>${firstName}</td>
+            <td>${lastName}</td>
+            <td>${employee.email || '-'}</td>
             <td>${employee.phone_number || '-'}</td>
-            <td>${employee.role}</td>
+            <td>${employee.role || '-'}</td>
             <td>${hireDate}</td>
             <td>${statusBadge}</td>
             <td>
-              <a href="./employees.html" class="btn btn-sm btn-outline-primary">Edit</a>
+              <button onclick="openEditEmployeeModal(${employee.employee_id})" class="btn btn-sm btn-outline-primary">Edit</button>
               <button onclick="deactivateEmployee(${employee.employee_id})" class="btn btn-sm btn-outline-danger">Deactivate</button>
             </td>
           </tr>
@@ -280,6 +349,112 @@
       } catch (error) {
         console.error('Error adding employee:', error);
         alert('Error adding employee: ' + error.message);
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
+        window.location.href = './index.html';
+      }
+    }
+
+    // Update navigation based on login status
+    const userToken = localStorage.getItem('userToken');
+    if (userToken) {
+      document.getElementById('loginNavItem').style.display = 'none';
+      document.getElementById('profileNavItem').style.display = 'block';
+      document.getElementById('logoutNavItem').style.display = 'block';
+    }
+
+    let currentEmployeePassword = '';
+
+    async function openEditEmployeeModal(id) {
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/employees/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to load employee data');
+        }
+        
+        const employee = await response.json();
+        
+        // Store current password
+        currentEmployeePassword = employee.userpassword || employee.userPassword || '';
+        
+        // Populate form
+        document.getElementById('editEmployeeId').value = employee.employee_id || employee.employeeId;
+        document.getElementById('editEmpFirstName').value = employee.first_name || employee.firstName || '';
+        document.getElementById('editEmpLastName').value = employee.last_name || employee.lastName || '';
+        document.getElementById('editEmpEmail').value = employee.email || '';
+        document.getElementById('editEmpPhone').value = employee.phone_number || employee.phoneNumber || '';
+        document.getElementById('editEmpRole').value = employee.role || '';
+        document.getElementById('editEmpHireDate').value = employee.hire_date || employee.hireDate || '';
+        document.getElementById('editEmpIsActive').checked = employee.is_active !== undefined ? employee.is_active : (employee.isActive !== undefined ? employee.isActive : true);
+        document.getElementById('editEmpPassword').value = ''; // Don't pre-fill password
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Error loading employee:', error);
+        alert('Error loading employee data: ' + error.message);
+      }
+    }
+
+    async function submitEditEmployee() {
+      const form = document.getElementById('editEmployeeForm');
+      // Remove password requirement temporarily
+      const passwordField = document.getElementById('editEmpPassword');
+      const passwordRequired = passwordField.required;
+      passwordField.required = false;
+      
+      if (!form.checkValidity()) {
+        passwordField.required = passwordRequired;
+        form.reportValidity();
+        return;
+      }
+      passwordField.required = passwordRequired;
+
+      const id = document.getElementById('editEmployeeId').value;
+      const newPassword = document.getElementById('editEmpPassword').value;
+      const employeeData = {
+        FirstName: document.getElementById('editEmpFirstName').value,
+        LastName: document.getElementById('editEmpLastName').value,
+        Email: document.getElementById('editEmpEmail').value,
+        PhoneNumber: document.getElementById('editEmpPhone').value || null,
+        UserPassword: newPassword || currentEmployeePassword, // Use new password or keep existing
+        Role: document.getElementById('editEmpRole').value,
+        HireDate: document.getElementById('editEmpHireDate').value || null,
+        IsActive: document.getElementById('editEmpIsActive').checked
+      };
+
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/employees/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(employeeData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Update failed: ${response.status}`);
+        }
+
+        // Close modal and reload
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editEmployeeModal'));
+        modal.hide();
+        form.reset();
+        loadEmployees();
+        alert('Employee updated successfully!');
+      } catch (error) {
+        console.error('Error updating employee:', error);
+        alert('Error updating employee: ' + error.message);
       }
     }
 

@@ -40,6 +40,15 @@
           <li class="nav-item">
             <a class="nav-link" href="./transactions.html">Transactions</a>
           </li>
+          <li class="nav-item" id="loginNavItem">
+            <a class="nav-link" href="./login.html">Login</a>
+          </li>
+          <li class="nav-item" id="profileNavItem" style="display: none;">
+            <a class="nav-link" href="./profile.html">Profile</a>
+          </li>
+          <li class="nav-item" id="logoutNavItem" style="display: none;">
+            <a class="nav-link" href="#" onclick="logout(); return false;">Logout</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -131,6 +140,52 @@
     </div>
   </div>
 
+  <!-- Edit Customer Modal -->
+  <div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editCustomerModalLabel">Edit Customer</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editCustomerForm">
+            <input type="hidden" id="editCustomerId">
+            <div class="mb-3">
+              <label for="editFirstName" class="form-label">First Name *</label>
+              <input type="text" class="form-control" id="editFirstName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editLastName" class="form-label">Last Name *</label>
+              <input type="text" class="form-control" id="editLastName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editEmail" class="form-label">Email *</label>
+              <input type="email" class="form-control" id="editEmail" required>
+            </div>
+            <div class="mb-3">
+              <label for="editPhone" class="form-label">Phone</label>
+              <input type="tel" class="form-control" id="editPhone">
+            </div>
+            <div class="mb-3">
+              <label for="editPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="editPassword" placeholder="Leave blank to keep existing password">
+              <small class="text-muted">Enter new password or leave blank to keep existing</small>
+            </div>
+            <div class="mb-3">
+              <label for="editAddress" class="form-label">Address</label>
+              <input type="text" class="form-control" id="editAddress">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitEditCustomer()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="mt-5">
     <div class="container">
       <p class="mb-0">&copy; 2024 Campus ReHome - CollegeTown Furniture Platform | Roll Tide! 🐘</p>
@@ -189,19 +244,35 @@
       }
       
       tbody.innerHTML = customers.map(customer => {
-        const joinDate = new Date(customer.join_date).toLocaleDateString();
+        const joinDate = new Date(customer.join_date || customer.joinDate || customer.JoinDate).toLocaleDateString();
+        // Handle both snake_case and camelCase/PascalCase - check if value exists (not just falsy)
+        const firstName = (customer.first_name !== undefined && customer.first_name !== null && customer.first_name !== '') 
+          ? customer.first_name 
+          : (customer.firstName !== undefined && customer.firstName !== null && customer.firstName !== '')
+          ? customer.firstName
+          : (customer.FirstName !== undefined && customer.FirstName !== null && customer.FirstName !== '')
+          ? customer.FirstName
+          : 'N/A';
+        const lastName = (customer.last_name !== undefined && customer.last_name !== null && customer.last_name !== '') 
+          ? customer.last_name 
+          : (customer.lastName !== undefined && customer.lastName !== null && customer.lastName !== '')
+          ? customer.lastName
+          : (customer.LastName !== undefined && customer.LastName !== null && customer.LastName !== '')
+          ? customer.LastName
+          : 'N/A';
+        const customerId = customer.customer_id || customer.customerId || customer.CustomerId || '';
         return `
           <tr>
-            <td>${customer.customer_id}</td>
-            <td>${customer.first_name}</td>
-            <td>${customer.last_name}</td>
-            <td>${customer.email}</td>
-            <td>${customer.phone || '-'}</td>
-            <td>${customer.address || '-'}</td>
+            <td>${customerId}</td>
+            <td>${firstName}</td>
+            <td>${lastName}</td>
+            <td>${customer.email || customer.Email || '-'}</td>
+            <td>${customer.phone || customer.Phone || '-'}</td>
+            <td>${customer.address || customer.Address || '-'}</td>
             <td>${joinDate}</td>
             <td>
-              <a href="./customers.html" class="btn btn-sm btn-outline-primary">Edit</a>
-              <button onclick="deleteCustomer(${customer.customer_id})" class="btn btn-sm btn-outline-danger">Delete</button>
+              <button onclick="openEditCustomerModal(${customerId})" class="btn btn-sm btn-outline-primary">Edit</button>
+              <button onclick="deleteCustomer(${customerId})" class="btn btn-sm btn-outline-danger">Delete</button>
             </td>
           </tr>
         `;
@@ -270,6 +341,327 @@
       } catch (error) {
         console.error('Error adding customer:', error);
         alert('Error adding customer: ' + error.message);
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
+        window.location.href = './index.html';
+      }
+    }
+
+    // Update navigation based on login status
+    const userToken = localStorage.getItem('userToken');
+    if (userToken) {
+      document.getElementById('loginNavItem').style.display = 'none';
+      document.getElementById('profileNavItem').style.display = 'block';
+      document.getElementById('logoutNavItem').style.display = 'block';
+    }
+
+    let currentCustomerPassword = '';
+    let currentEditCustomerData = null; // Store customer data for form population
+
+    async function openEditCustomerModal(id) {
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/customers/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to load customer data');
+        }
+        
+        const customer = await response.json();
+        
+        console.log('Customer data received:', customer); // Debug log
+        
+        // Handle both snake_case (from API) and camelCase/PascalCase formats
+        // Check for actual values, not just truthy (to handle empty strings)
+        const customerId = customer.customer_id ?? customer.customerId ?? customer.CustomerId ?? '';
+        const firstName = customer.first_name ?? customer.firstName ?? customer.FirstName ?? '';
+        const lastName = customer.last_name ?? customer.lastName ?? customer.LastName ?? '';
+        const email = customer.email ?? customer.Email ?? '';
+        const phone = customer.phone ?? customer.Phone ?? '';
+        const address = customer.address ?? customer.Address ?? '';
+        const password = customer.userpassword ?? customer.userPassword ?? customer.UserPassword ?? '';
+        
+        // Store current password and customer data
+        currentCustomerPassword = password;
+        currentEditCustomerData = {
+          customerId,
+          firstName,
+          lastName,
+          email,
+          phone: phone ?? '',
+          address: address ?? ''
+        };
+        
+        console.log('Parsed values:', { customerId, firstName, lastName, email, phone, address }); // Debug log
+        console.log('Stored customer data:', currentEditCustomerData);
+        
+        // Populate form - use nullish coalescing to preserve empty strings
+        const editCustomerIdEl = document.getElementById('editCustomerId');
+        const editFirstNameEl = document.getElementById('editFirstName');
+        const editLastNameEl = document.getElementById('editLastName');
+        const editEmailEl = document.getElementById('editEmail');
+        const editPhoneEl = document.getElementById('editPhone');
+        const editAddressEl = document.getElementById('editAddress');
+        const editPasswordEl = document.getElementById('editPassword');
+        
+        if (editCustomerIdEl) editCustomerIdEl.value = customerId;
+        if (editFirstNameEl) editFirstNameEl.value = firstName;
+        if (editLastNameEl) editLastNameEl.value = lastName;
+        if (editEmailEl) editEmailEl.value = email;
+        if (editPhoneEl) editPhoneEl.value = phone ?? '';
+        if (editAddressEl) editAddressEl.value = address ?? '';
+        if (editPasswordEl) {
+          editPasswordEl.value = ''; // Don't pre-fill password
+          editPasswordEl.required = false; // Make optional
+        }
+        
+        console.log('Form populated with:', { customerId, firstName, lastName, email, phone, address }); // Debug log
+        
+        // Show modal first, then populate (Bootstrap might reset form on show)
+        const modalElement = document.getElementById('editCustomerModal');
+        const modal = new bootstrap.Modal(modalElement);
+        
+        // Function to populate form
+        const populateForm = () => {
+          if (editCustomerIdEl) editCustomerIdEl.value = customerId;
+          if (editFirstNameEl) {
+            editFirstNameEl.value = firstName;
+            console.log('Set firstName to:', firstName, 'Actual value:', editFirstNameEl.value);
+          }
+          if (editLastNameEl) {
+            editLastNameEl.value = lastName;
+            console.log('Set lastName to:', lastName, 'Actual value:', editLastNameEl.value);
+          }
+          if (editEmailEl) editEmailEl.value = email;
+          if (editPhoneEl) editPhoneEl.value = phone ?? '';
+          if (editAddressEl) editAddressEl.value = address ?? '';
+          if (editPasswordEl) {
+            editPasswordEl.value = '';
+            editPasswordEl.required = false;
+          }
+        };
+        
+        // Populate immediately
+        populateForm();
+        
+        // Wait for modal to be shown, then populate again (in case Bootstrap reset it)
+        modalElement.addEventListener('shown.bs.modal', function onModalShown() {
+          console.log('Modal shown, repopulating form...');
+          populateForm();
+          
+          // Verify values are set
+          setTimeout(() => {
+            console.log('Form field values after modal shown:', {
+              firstName: editFirstNameEl?.value,
+              lastName: editLastNameEl?.value,
+              email: editEmailEl?.value,
+              customerId: editCustomerIdEl?.value,
+              firstNameElement: editFirstNameEl,
+              lastNameElement: editLastNameEl
+            });
+          }, 100);
+          
+          // Remove listener after first use
+          modalElement.removeEventListener('shown.bs.modal', onModalShown);
+        }, { once: true });
+        
+        modal.show();
+        
+        // Also populate after a short delay as backup
+        setTimeout(() => {
+          populateForm();
+          console.log('Backup population - Form values:', {
+            firstName: editFirstNameEl?.value,
+            lastName: editLastNameEl?.value
+          });
+        }, 200);
+      } catch (error) {
+        console.error('Error loading customer:', error);
+        alert('Error loading customer data: ' + error.message);
+      }
+    }
+
+    async function submitEditCustomer() {
+      const form = document.getElementById('editCustomerForm');
+      // Remove password requirement temporarily
+      const passwordField = document.getElementById('editPassword');
+      const passwordRequired = passwordField.required;
+      passwordField.required = false;
+      
+      if (!form.checkValidity()) {
+        passwordField.required = passwordRequired;
+        form.reportValidity();
+        return;
+      }
+      passwordField.required = passwordRequired;
+
+      const id = document.getElementById('editCustomerId').value;
+      const newPassword = document.getElementById('editPassword').value.trim();
+      
+      // If password is empty, we need to fetch current password first
+      let passwordToUse = newPassword;
+      if (!passwordToUse) {
+        if (!currentCustomerPassword) {
+          // Fetch current customer to get password
+          try {
+            const getResponse = await fetch(`${getApiBaseUrl()}/customers/${id}`);
+            if (getResponse.ok) {
+              const currentCustomer = await getResponse.json();
+              currentCustomerPassword = currentCustomer.userpassword || currentCustomer.userPassword || '';
+              passwordToUse = currentCustomerPassword;
+            } else {
+              throw new Error('Could not retrieve current password');
+            }
+          } catch (err) {
+            alert('Error: Could not retrieve current password. Please enter a new password.');
+            return;
+          }
+        } else {
+          passwordToUse = currentCustomerPassword;
+        }
+      }
+      
+      // Get form values and validate
+      const firstNameInput = document.getElementById('editFirstName');
+      const lastNameInput = document.getElementById('editLastName');
+      const emailInput = document.getElementById('editEmail');
+      const phoneInput = document.getElementById('editPhone');
+      const addressInput = document.getElementById('editAddress');
+      
+      console.log('Form elements found:', {
+        firstNameInput: !!firstNameInput,
+        lastNameInput: !!lastNameInput,
+        firstNameInputValue: firstNameInput?.value,
+        lastNameInputValue: lastNameInput?.value,
+        storedData: currentEditCustomerData
+      });
+      
+      if (!firstNameInput || !lastNameInput) {
+        alert('Error: Form fields not found. Please refresh the page and try again.');
+        console.error('Form fields missing:', { firstNameInput, lastNameInput });
+        return;
+      }
+      
+      // Get raw values from form, with fallback to stored data
+      let firstNameRaw = firstNameInput.value || '';
+      let lastNameRaw = lastNameInput.value || '';
+      let emailRaw = emailInput ? (emailInput.value || '') : '';
+      let phoneRaw = phoneInput ? (phoneInput.value || '') : '';
+      let addressRaw = addressInput ? (addressInput.value || '') : '';
+      
+      // If form values are empty, use stored data as fallback
+      if ((!firstNameRaw || firstNameRaw.trim() === '') && currentEditCustomerData) {
+        console.warn('First name empty in form, using stored data');
+        firstNameRaw = currentEditCustomerData.firstName || '';
+      }
+      if ((!lastNameRaw || lastNameRaw.trim() === '') && currentEditCustomerData) {
+        console.warn('Last name empty in form, using stored data');
+        lastNameRaw = currentEditCustomerData.lastName || '';
+      }
+      if ((!emailRaw || emailRaw.trim() === '') && currentEditCustomerData) {
+        emailRaw = currentEditCustomerData.email || '';
+      }
+      if ((!phoneRaw || phoneRaw.trim() === '') && currentEditCustomerData) {
+        phoneRaw = currentEditCustomerData.phone || '';
+      }
+      if ((!addressRaw || addressRaw.trim() === '') && currentEditCustomerData) {
+        addressRaw = currentEditCustomerData.address || '';
+      }
+      
+      // Trim values
+      const firstName = String(firstNameRaw).trim();
+      const lastName = String(lastNameRaw).trim();
+      const email = String(emailRaw).trim();
+      const phone = String(phoneRaw).trim();
+      const address = String(addressRaw).trim();
+      
+      console.log('Form values before submission:', { 
+        firstName, 
+        lastName, 
+        email, 
+        phone, 
+        address,
+        firstNameRaw,
+        lastNameRaw,
+        firstNameLength: firstName.length,
+        lastNameLength: lastName.length,
+        firstNameInputExists: !!firstNameInput,
+        lastNameInputExists: !!lastNameInput,
+        firstNameInputValueDirect: firstNameInput.value,
+        lastNameInputValueDirect: lastNameInput.value
+      }); // Debug log
+      
+      // Validate required fields
+      if (!firstName || firstName.length === 0) {
+        alert('First name is required! Current value: "' + firstNameRaw + '"');
+        firstNameInput.focus();
+        console.error('First name validation failed:', { firstName, firstNameRaw, inputValue: firstNameInput.value });
+        return;
+      }
+      
+      if (!lastName || lastName.length === 0) {
+        alert('Last name is required! Current value: "' + lastNameRaw + '"');
+        lastNameInput.focus();
+        console.error('Last name validation failed:', { lastName, lastNameRaw, inputValue: lastNameInput.value });
+        return;
+      }
+      
+      const customerData = {
+        FirstName: firstName,
+        LastName: lastName,
+        Email: email,
+        Phone: phone || null,
+        UserPassword: passwordToUse,
+        Address: address || null
+      };
+
+      console.log('Updating customer:', id, customerData); // Debug log
+
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/customers/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(customerData)
+        });
+
+        console.log('Update response status:', response.status); // Debug log
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Update error response:', errorText);
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { message: errorText || `Update failed: ${response.status}` };
+          }
+          throw new Error(errorData.message || `Update failed: ${response.status}`);
+        }
+
+        // Try to get response data
+        const responseData = await response.json().catch(() => null);
+        console.log('Update response data:', responseData); // Debug log
+
+        // Close modal and reload
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editCustomerModal'));
+        modal.hide();
+        form.reset();
+        currentCustomerPassword = ''; // Reset password cache
+        
+        // Reload immediately
+        await loadCustomers();
+        alert('Customer updated successfully!');
+      } catch (error) {
+        console.error('Error updating customer:', error);
+        alert('Error updating customer: ' + error.message);
       }
     }
 

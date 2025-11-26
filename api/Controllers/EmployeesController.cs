@@ -48,11 +48,25 @@ public class EmployeesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateEmployee(int id, [FromBody] Employee employee)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!ModelState.IsValid) 
+        {
+            return BadRequest(new { message = "Invalid model state", errors = ModelState });
+        }
+        
+        if (string.IsNullOrWhiteSpace(employee.FirstName) || string.IsNullOrWhiteSpace(employee.LastName))
+        {
+            return BadRequest(new { message = "First name and last name are required" });
+        }
         
         var updated = await _db.UpdateEmployeeAsync(id, employee);
-        if (!updated) return NotFound();
-        return NoContent();
+        if (!updated) 
+        {
+            return NotFound(new { message = $"Employee with id {id} not found" });
+        }
+        
+        // Return the updated employee instead of NoContent
+        var updatedEmployee = await _db.GetEmployeeByIdAsync(id);
+        return Ok(updatedEmployee);
     }
 
     [HttpPost("{id}/delete")]

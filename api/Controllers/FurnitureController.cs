@@ -49,11 +49,25 @@ public class FurnitureController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateFurniture(int id, [FromBody] Furniture furniture)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!ModelState.IsValid) 
+        {
+            return BadRequest(new { message = "Invalid model state", errors = ModelState });
+        }
+        
+        if (string.IsNullOrWhiteSpace(furniture.ItemName))
+        {
+            return BadRequest(new { message = "Item name is required" });
+        }
         
         var updated = await _db.UpdateFurnitureAsync(id, furniture);
-        if (!updated) return NotFound();
-        return NoContent();
+        if (!updated) 
+        {
+            return NotFound(new { message = $"Furniture with id {id} not found" });
+        }
+        
+        // Return the updated furniture instead of NoContent
+        var updatedFurniture = await _db.GetFurnitureByIdAsync(id);
+        return Ok(updatedFurniture);
     }
 
     [HttpPost("{id}/delete")]

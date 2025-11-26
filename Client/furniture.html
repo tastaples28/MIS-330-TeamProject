@@ -40,6 +40,15 @@
           <li class="nav-item">
             <a class="nav-link" href="./transactions.html">Transactions</a>
           </li>
+          <li class="nav-item" id="loginNavItem">
+            <a class="nav-link" href="./login.html">Login</a>
+          </li>
+          <li class="nav-item" id="profileNavItem" style="display: none;">
+            <a class="nav-link" href="./profile.html">Profile</a>
+          </li>
+          <li class="nav-item" id="logoutNavItem" style="display: none;">
+            <a class="nav-link" href="#" onclick="logout(); return false;">Logout</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -160,6 +169,66 @@
     </div>
   </div>
 
+  <!-- Edit Furniture Modal -->
+  <div class="modal fade" id="editFurnitureModal" tabindex="-1" aria-labelledby="editFurnitureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editFurnitureModalLabel">Edit Furniture</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editFurnitureForm">
+            <input type="hidden" id="editFurnitureId">
+            <div class="mb-3">
+              <label for="editItemName" class="form-label">Item Name *</label>
+              <input type="text" class="form-control" id="editItemName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editCategory" class="form-label">Category *</label>
+              <input type="text" class="form-control" id="editCategory" required placeholder="e.g., Chair, Table, Sofa">
+            </div>
+            <div class="mb-3">
+              <label for="editDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="editDescription" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="editItemCondition" class="form-label">Condition *</label>
+              <select class="form-select" id="editItemCondition" required>
+                <option value="">Select condition...</option>
+                <option value="New">New</option>
+                <option value="Like New">Like New</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Poor">Poor</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editPrice" class="form-label">Price *</label>
+              <input type="number" class="form-control" id="editPrice" step="0.01" min="0" required>
+            </div>
+            <div class="mb-3">
+              <label for="editStockQuantity" class="form-label">Stock Quantity *</label>
+              <input type="number" class="form-control" id="editStockQuantity" min="0" required>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="editIsActive" checked>
+                <label class="form-check-label" for="editIsActive">
+                  Active
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitEditFurniture()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="mt-5">
     <div class="container">
       <p class="mb-0">&copy; 2024 Campus ReHome - CollegeTown Furniture Platform | Roll Tide! 🐘</p>
@@ -183,20 +252,23 @@
         return;
       }
       
-      tbody.innerHTML = furniture.map(item => `
+      tbody.innerHTML = furniture.map(item => {
+        const itemName = item.item_name || 'N/A';
+        return `
         <tr>
           <td>${item.furniture_id}</td>
-          <td>${item.item_name}</td>
-          <td>${item.category}</td>
-          <td>${item.item_condition}</td>
-          <td>$${parseFloat(item.price).toFixed(2)}</td>
-          <td>${item.stock_quantity}</td>
+          <td>${itemName}</td>
+          <td>${item.category || '-'}</td>
+          <td>${item.item_condition || '-'}</td>
+          <td>$${parseFloat(item.price || 0).toFixed(2)}</td>
+          <td>${item.stock_quantity || 0}</td>
           <td>
-            <a href="./furniture.html" class="btn btn-sm btn-outline-primary">Edit</a>
+            <button onclick="openEditFurnitureModal(${item.furniture_id})" class="btn btn-sm btn-outline-primary">Edit</button>
             <button onclick="deleteFurniture(${item.furniture_id})" class="btn btn-sm btn-outline-danger">Delete</button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function populateCategories(categories) {
@@ -331,6 +403,97 @@
         console.error('Error adding furniture:', error);
         alert('Error adding furniture: ' + error.message);
       }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
+        window.location.href = './index.html';
+      }
+    }
+
+    async function openEditFurnitureModal(id) {
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/furniture/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to load furniture data');
+        }
+        
+        const item = await response.json();
+        
+        // Populate form
+        document.getElementById('editFurnitureId').value = item.furniture_id || item.furnitureId;
+        document.getElementById('editItemName').value = item.item_name || item.itemName || '';
+        document.getElementById('editCategory').value = item.category || '';
+        document.getElementById('editDescription').value = item.description || '';
+        document.getElementById('editItemCondition').value = item.item_condition || item.itemCondition || '';
+        document.getElementById('editPrice').value = item.price || '';
+        document.getElementById('editStockQuantity').value = item.stock_quantity || item.stockQuantity || '';
+        document.getElementById('editIsActive').checked = item.is_active !== undefined ? item.is_active : (item.isActive !== undefined ? item.isActive : true);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editFurnitureModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Error loading furniture:', error);
+        alert('Error loading furniture data: ' + error.message);
+      }
+    }
+
+    async function submitEditFurniture() {
+      const form = document.getElementById('editFurnitureForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const id = document.getElementById('editFurnitureId').value;
+      const furnitureData = {
+        ItemName: document.getElementById('editItemName').value,
+        Category: document.getElementById('editCategory').value,
+        Description: document.getElementById('editDescription').value || null,
+        ItemCondition: document.getElementById('editItemCondition').value,
+        Price: parseFloat(document.getElementById('editPrice').value),
+        StockQuantity: parseInt(document.getElementById('editStockQuantity').value),
+        IsActive: document.getElementById('editIsActive').checked
+      };
+
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/furniture/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(furnitureData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Update failed: ${response.status}`);
+        }
+
+        // Close modal and reload
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editFurnitureModal'));
+        modal.hide();
+        form.reset();
+        loadFurniture('', '');
+        alert('Furniture updated successfully!');
+      } catch (error) {
+        console.error('Error updating furniture:', error);
+        alert('Error updating furniture: ' + error.message);
+      }
+    }
+
+    // Update navigation based on login status
+    const userToken = localStorage.getItem('userToken');
+    if (userToken) {
+      document.getElementById('loginNavItem').style.display = 'none';
+      document.getElementById('profileNavItem').style.display = 'block';
+      document.getElementById('logoutNavItem').style.display = 'block';
     }
 
     // Load on page load

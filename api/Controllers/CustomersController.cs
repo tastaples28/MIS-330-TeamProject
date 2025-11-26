@@ -49,11 +49,25 @@ public class CustomersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCustomer(int id, [FromBody] Customer customer)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!ModelState.IsValid) 
+        {
+            return BadRequest(new { message = "Invalid model state", errors = ModelState });
+        }
+        
+        if (string.IsNullOrWhiteSpace(customer.FirstName) || string.IsNullOrWhiteSpace(customer.LastName))
+        {
+            return BadRequest(new { message = "First name and last name are required" });
+        }
         
         var updated = await _db.UpdateCustomerAsync(id, customer);
-        if (!updated) return NotFound();
-        return NoContent();
+        if (!updated) 
+        {
+            return NotFound(new { message = $"Customer with id {id} not found" });
+        }
+        
+        // Return the updated customer instead of NoContent
+        var updatedCustomer = await _db.GetCustomerByIdAsync(id);
+        return Ok(updatedCustomer);
     }
 
     [HttpDelete("{id}")]
