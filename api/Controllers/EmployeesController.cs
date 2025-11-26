@@ -187,16 +187,123 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateEmployee(int id, [FromBody] Employee employee)
+    public async Task<IActionResult> UpdateEmployee(int id, [FromBody] System.Text.Json.JsonElement jsonElement)
     {
-        if (!ModelState.IsValid) 
+        Employee employee = new Employee();
+        
+        try
         {
-            return BadRequest(new { message = "Invalid model state", errors = ModelState });
+            // Manually extract properties to handle naming conventions
+            var rawJson = jsonElement.GetRawText();
+            Console.WriteLine($"Raw employee update JSON received: {rawJson}");
+            
+            // First Name - try all variations
+            if (jsonElement.TryGetProperty("FirstName", out var fn1))
+                employee.FirstName = fn1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("first_name", out var fn2))
+                employee.FirstName = fn2.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("firstName", out var fn3))
+                employee.FirstName = fn3.GetString() ?? string.Empty;
+            
+            // Last Name - try all variations
+            if (jsonElement.TryGetProperty("LastName", out var ln1))
+                employee.LastName = ln1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("last_name", out var ln2))
+                employee.LastName = ln2.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("lastName", out var ln3))
+                employee.LastName = ln3.GetString() ?? string.Empty;
+            
+            // Email - try all variations
+            if (jsonElement.TryGetProperty("Email", out var em1))
+                employee.Email = em1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("email", out var em2))
+                employee.Email = em2.GetString() ?? string.Empty;
+            
+            // Password - try all variations
+            if (jsonElement.TryGetProperty("UserPassword", out var pw1))
+                employee.UserPassword = pw1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("userpassword", out var pw2))
+                employee.UserPassword = pw2.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("user_password", out var pw3))
+                employee.UserPassword = pw3.GetString() ?? string.Empty;
+            
+            // Phone Number
+            if (jsonElement.TryGetProperty("PhoneNumber", out var ph1))
+            {
+                if (ph1.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    employee.PhoneNumber = null;
+                else
+                    employee.PhoneNumber = ph1.GetString();
+            }
+            else if (jsonElement.TryGetProperty("phone_number", out var ph2))
+            {
+                if (ph2.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    employee.PhoneNumber = null;
+                else
+                    employee.PhoneNumber = ph2.GetString();
+            }
+            else if (jsonElement.TryGetProperty("phoneNumber", out var ph3))
+            {
+                if (ph3.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    employee.PhoneNumber = null;
+                else
+                    employee.PhoneNumber = ph3.GetString();
+            }
+            
+            // Role
+            if (jsonElement.TryGetProperty("Role", out var r1))
+                employee.Role = r1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("role", out var r2))
+                employee.Role = r2.GetString() ?? string.Empty;
+            
+            // Hire Date
+            if (jsonElement.TryGetProperty("HireDate", out var hd1))
+            {
+                if (hd1.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    employee.HireDate = null;
+                else if (hd1.ValueKind == System.Text.Json.JsonValueKind.String && DateTime.TryParse(hd1.GetString(), out var date1))
+                    employee.HireDate = date1;
+            }
+            else if (jsonElement.TryGetProperty("hire_date", out var hd2))
+            {
+                if (hd2.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    employee.HireDate = null;
+                else if (hd2.ValueKind == System.Text.Json.JsonValueKind.String && DateTime.TryParse(hd2.GetString(), out var date2))
+                    employee.HireDate = date2;
+            }
+            else if (jsonElement.TryGetProperty("hireDate", out var hd3))
+            {
+                if (hd3.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    employee.HireDate = null;
+                else if (hd3.ValueKind == System.Text.Json.JsonValueKind.String && DateTime.TryParse(hd3.GetString(), out var date3))
+                    employee.HireDate = date3;
+            }
+            
+            // Is Active
+            if (jsonElement.TryGetProperty("IsActive", out var ia1))
+                employee.IsActive = ia1.GetBoolean();
+            else if (jsonElement.TryGetProperty("is_active", out var ia2))
+                employee.IsActive = ia2.GetBoolean();
+            else if (jsonElement.TryGetProperty("isActive", out var ia3))
+                employee.IsActive = ia3.GetBoolean();
+            else
+                employee.IsActive = true; // Default to true
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error extracting employee update data: {ex.Message}");
+            return BadRequest(new { message = "Invalid employee data format", error = ex.Message });
         }
         
-        if (string.IsNullOrWhiteSpace(employee.FirstName) || string.IsNullOrWhiteSpace(employee.LastName))
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(employee.FirstName))
         {
-            return BadRequest(new { message = "First name and last name are required" });
+            return BadRequest(new { message = "First name is required" });
+        }
+        
+        if (string.IsNullOrWhiteSpace(employee.LastName))
+        {
+            return BadRequest(new { message = "Last name is required" });
         }
         
         var updated = await _db.UpdateEmployeeAsync(id, employee);

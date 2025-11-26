@@ -164,16 +164,93 @@ public class CustomersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] Customer customer)
+    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] System.Text.Json.JsonElement jsonElement)
     {
-        if (!ModelState.IsValid) 
+        Customer customer = new Customer();
+        
+        try
         {
-            return BadRequest(new { message = "Invalid model state", errors = ModelState });
+            // Manually extract properties to handle naming conventions
+            var rawJson = jsonElement.GetRawText();
+            Console.WriteLine($"Raw customer update JSON received: {rawJson}");
+            
+            // First Name - try all variations
+            if (jsonElement.TryGetProperty("FirstName", out var fn1))
+                customer.FirstName = fn1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("first_name", out var fn2))
+                customer.FirstName = fn2.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("firstName", out var fn3))
+                customer.FirstName = fn3.GetString() ?? string.Empty;
+            
+            // Last Name - try all variations
+            if (jsonElement.TryGetProperty("LastName", out var ln1))
+                customer.LastName = ln1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("last_name", out var ln2))
+                customer.LastName = ln2.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("lastName", out var ln3))
+                customer.LastName = ln3.GetString() ?? string.Empty;
+            
+            // Email - try all variations
+            if (jsonElement.TryGetProperty("Email", out var em1))
+                customer.Email = em1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("email", out var em2))
+                customer.Email = em2.GetString() ?? string.Empty;
+            
+            // Password - try all variations
+            if (jsonElement.TryGetProperty("UserPassword", out var pw1))
+                customer.UserPassword = pw1.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("userpassword", out var pw2))
+                customer.UserPassword = pw2.GetString() ?? string.Empty;
+            else if (jsonElement.TryGetProperty("user_password", out var pw3))
+                customer.UserPassword = pw3.GetString() ?? string.Empty;
+            
+            // Phone
+            if (jsonElement.TryGetProperty("Phone", out var ph1))
+            {
+                if (ph1.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    customer.Phone = null;
+                else
+                    customer.Phone = ph1.GetString();
+            }
+            else if (jsonElement.TryGetProperty("phone", out var ph2))
+            {
+                if (ph2.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    customer.Phone = null;
+                else
+                    customer.Phone = ph2.GetString();
+            }
+            
+            // Address
+            if (jsonElement.TryGetProperty("Address", out var ad1))
+            {
+                if (ad1.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    customer.Address = null;
+                else
+                    customer.Address = ad1.GetString();
+            }
+            else if (jsonElement.TryGetProperty("address", out var ad2))
+            {
+                if (ad2.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    customer.Address = null;
+                else
+                    customer.Address = ad2.GetString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error extracting customer update data: {ex.Message}");
+            return BadRequest(new { message = "Invalid customer data format", error = ex.Message });
         }
         
-        if (string.IsNullOrWhiteSpace(customer.FirstName) || string.IsNullOrWhiteSpace(customer.LastName))
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(customer.FirstName))
         {
-            return BadRequest(new { message = "First name and last name are required" });
+            return BadRequest(new { message = "First name is required" });
+        }
+        
+        if (string.IsNullOrWhiteSpace(customer.LastName))
+        {
+            return BadRequest(new { message = "Last name is required" });
         }
         
         var updated = await _db.UpdateCustomerAsync(id, customer);
