@@ -13,83 +13,115 @@
     crossorigin="anonymous"
   />
   
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
   <!-- Custom CSS -->
   <link rel="stylesheet" href="./styles/main.css" />
+  <style>
+    .login-container {
+      min-height: calc(100vh - 200px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+    .login-card {
+      border: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      max-width: 450px;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <a class="navbar-brand" href="./index.html">🏠 Campus ReHome</a>
+      <a class="navbar-brand fw-bold" href="./index.html">
+        <i class="bi bi-house-door"></i> Campus ReHome
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./furniture.html">Browse All</a>
+          </li>
+        </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link" href="./index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./furniture.html">Furniture</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./customers.html">Customers</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./employees.html">Employees</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./transactions.html">Transactions</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link active" href="./login.html">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./employee-login.html">Employee Login</a>
           </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container my-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
-        <div class="card shadow">
-          <div class="card-body p-5">
-            <h2 class="card-title text-center mb-4">Login</h2>
-            
-            <form id="loginForm">
-              <div class="mb-3">
-                <label for="loginEmail" class="form-label">Email *</label>
-                <input type="email" class="form-control" id="loginEmail" required>
+  <div class="login-container">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+          <div class="card login-card shadow">
+            <div class="card-body p-5">
+              <div class="text-center mb-4">
+                <h2 class="card-title mb-2">Welcome Back!</h2>
+                <p class="text-muted">Sign in to your account</p>
               </div>
-              <div class="mb-3">
-                <label for="loginPassword" class="form-label">Password *</label>
-                <input type="password" class="form-control" id="loginPassword" required>
+              
+              <form id="loginForm">
+                
+                <div class="mb-3">
+                  <label for="loginEmail" class="form-label">
+                    <i class="bi bi-envelope"></i> Email Address *
+                  </label>
+                  <input type="email" class="form-control" id="loginEmail" required placeholder="Enter your email">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="loginPassword" class="form-label">
+                    <i class="bi bi-lock"></i> Password *
+                  </label>
+                  <input type="password" class="form-control" id="loginPassword" required placeholder="Enter your password">
+                </div>
+                
+                <div class="d-grid mb-3">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Sign In
+                  </button>
+                </div>
+              </form>
+              
+              <div class="text-center">
+                <p class="mb-2">Don't have an account?</p>
+                <a href="./register.html" class="btn btn-outline-primary">
+                  <i class="bi bi-person-plus"></i> Create Account
+                </a>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Login As</label>
-                <select class="form-select" id="userType" required>
-                  <option value="">Select user type...</option>
-                  <option value="customer">Customer</option>
-                  <option value="employee">Employee</option>
-                </select>
+              
+              <div class="text-center mt-4">
+                <a href="./employee-login.html" class="text-decoration-none text-muted small">
+                  <i class="bi bi-briefcase"></i> Employee Login
+                </a>
               </div>
-              <div class="d-grid">
-                <button type="submit" class="btn btn-primary btn-lg">Login</button>
-              </div>
-            </form>
-            
-            <div class="text-center mt-4">
-              <p class="mb-0">Don't have an account? <a href="./register.html">Register here</a></p>
+              
+              <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
             </div>
-            
-            <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <footer class="mt-5">
-    <div class="container">
+  <footer class="mt-5 py-4 bg-primary text-white">
+    <div class="container text-center">
       <p class="mb-0">&copy; 2024 Campus ReHome - CollegeTown Furniture Platform | Roll Tide! 🐘</p>
     </div>
   </footer>
@@ -112,54 +144,94 @@
 
     // Check if already logged in
     if (localStorage.getItem('userToken') && localStorage.getItem('userType')) {
-      window.location.href = './profile.html';
+      const userType = localStorage.getItem('userType');
+      if (userType === 'employee' && localStorage.getItem('isAdmin')) {
+        window.location.href = './admin.html';
+      } else {
+        window.location.href = './profile.html';
+      }
     }
 
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      const email = document.getElementById('loginEmail').value;
+      const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
-      const userType = document.getElementById('userType').value;
-      const errorDiv = document.getElementById('loginError');
       
+      const errorDiv = document.getElementById('loginError');
       errorDiv.style.display = 'none';
       
+      // Validate
+      if (!email || !password) {
+        errorDiv.textContent = 'Please enter both email and password';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      console.log('Login attempt:', { email }); // Debug log
+      
       try {
-        const response = await fetch(`${getApiBaseUrl()}/auth/login`, {
+        const apiUrl = `${getApiBaseUrl()}/auth/login`;
+        console.log('Calling API:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             Email: email,
-            Password: password,
-            UserType: userType
+            Password: password
           })
         });
 
+        console.log('Response status:', response.status);
         const data = await response.json();
+        console.log('Response data:', data);
 
         if (!response.ok) {
-          throw new Error(data.message || 'Login failed');
+          throw new Error(data.message || 'Login failed. Please check your credentials.');
         }
 
-        // Store user info
+        // Store user info (backend returns snake_case, so use user_id instead of userId)
+        const userId = data.user_id || data.userId; // Support both formats
+        const userType = data.user_type || data.userType || 'customer'; // Get user type from response
         localStorage.setItem('userToken', data.token || 'authenticated');
-        localStorage.setItem('userId', data.userId);
+        localStorage.setItem('userId', userId);
         localStorage.setItem('userType', userType);
         localStorage.setItem('userName', data.name || email);
         localStorage.setItem('userEmail', email);
 
-        // Redirect to profile
-        window.location.href = './profile.html';
+        // Redirect based on user type from response
+        if (userType === 'employee') {
+          // Check if admin
+          try {
+            const empResponse = await fetch(`${getApiBaseUrl()}/employees/${userId}`);
+            if (empResponse.ok) {
+              const employee = await empResponse.json();
+              const role = (employee.role || '').toLowerCase();
+              if (role.includes('admin') || role.includes('manager')) {
+                localStorage.setItem('isAdmin', 'true');
+                localStorage.setItem('adminRole', employee.role);
+                window.location.href = './admin.html';
+                return;
+              }
+            }
+          } catch (err) {
+            console.error('Error checking admin status:', err);
+          }
+          // Regular employee - go to marketplace
+          window.location.href = './index.html';
+        } else {
+          // Customer - go to marketplace
+          window.location.href = './index.html';
+        }
       } catch (error) {
         console.error('Login error:', error);
-        errorDiv.textContent = error.message || 'Invalid email or password';
+        errorDiv.textContent = error.message || 'Invalid email or password. Please try again.';
         errorDiv.style.display = 'block';
       }
     });
   </script>
 </body>
 </html>
-

@@ -13,41 +13,106 @@
     crossorigin="anonymous"
   />
   
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
   <!-- Custom CSS -->
   <link rel="stylesheet" href="./styles/main.css" />
+  <style>
+    .product-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      height: 100%;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .product-image {
+      height: 200px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      color: #667eea;
+    }
+    .price-tag {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #28a745;
+    }
+    .stock-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .cart-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .category-badge {
+      background: #e9ecef;
+      color: #495057;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <a class="navbar-brand" href="./index.html">🏠 Campus ReHome</a>
+      <a class="navbar-brand fw-bold" href="./index.html">
+        <i class="bi bi-house-door"></i> Campus ReHome
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="./furniture.html">Browse All</a>
+          </li>
+        </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link" href="./index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="./furniture.html">Furniture</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./customers.html">Customers</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./employees.html">Employees</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./transactions.html">Transactions</a>
+            <a class="nav-link position-relative" href="#" onclick="openCart(); return false;">
+              <i class="bi bi-cart3"></i> Cart
+              <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
+            </a>
           </li>
           <li class="nav-item" id="loginNavItem">
             <a class="nav-link" href="./login.html">Login</a>
           </li>
           <li class="nav-item" id="profileNavItem" style="display: none;">
-            <a class="nav-link" href="./profile.html">Profile</a>
+            <a class="nav-link" href="./profile.html">My Account</a>
           </li>
           <li class="nav-item" id="logoutNavItem" style="display: none;">
             <a class="nav-link" href="#" onclick="logout(); return false;">Logout</a>
+          </li>
+          <li class="nav-item" id="adminMenu" style="display: none;">
+            <a class="nav-link" href="./admin.html">
+              <i class="bi bi-shield-check"></i> Admin
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./employee-login.html">
+              <i class="bi bi-briefcase"></i> Employee Login
+            </a>
           </li>
         </ul>
       </div>
@@ -57,12 +122,14 @@
   <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h1 class="mb-2">🪑 Furniture Inventory</h1>
-        <p class="text-muted mb-0">Manage your furniture catalog</p>
+        <h1 class="mb-2">Browse All Furniture</h1>
+        <p class="text-muted mb-0">Find the perfect pieces for your space</p>
       </div>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFurnitureModal">
-        <span>+</span> Add New Furniture
-      </button>
+      <div id="adminControls" style="display: none;">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFurnitureModal">
+          <i class="bi bi-plus-circle"></i> Add New Furniture
+        </button>
+      </div>
     </div>
 
     <!-- Search and Filter Form -->
@@ -87,32 +154,44 @@
       </div>
     </div>
 
-    <!-- Furniture Table -->
-    <div class="card">
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-striped table-hover">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Item Name</th>
-                <th>Category</th>
-                <th>Condition</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="furnitureTableBody">
-              <tr>
-                <td colspan="7" class="text-center">
-                  <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <!-- Furniture Grid View -->
+    <div id="furnitureLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <div id="furnitureGrid" class="row g-4">
+      <!-- Products will be loaded here -->
+    </div>
+    <div id="noFurniture" class="text-center py-5" style="display: none;">
+      <p class="text-muted">No furniture items found. Check back soon!</p>
+    </div>
+
+    <!-- Admin Table View (hidden by default) -->
+    <div id="adminTableView" class="mt-4" style="display: none;">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Admin View - Table Format</h5>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Condition</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="furnitureTableBody">
+                <tr>
+                  <td colspan="7" class="text-center">Loading furniture...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -246,29 +325,214 @@
     // Load furniture data
 
     function displayFurniture(furniture) {
-      const tbody = document.getElementById('furnitureTableBody');
+      const grid = document.getElementById('furnitureGrid');
+      const loading = document.getElementById('furnitureLoading');
+      const noFurniture = document.getElementById('noFurniture');
+      const tableBody = document.getElementById('furnitureTableBody');
+      const isAdmin = localStorage.getItem('userType') === 'employee';
+
+      loading.style.display = 'none';
+
       if (furniture.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No furniture found</td></tr>';
+        grid.innerHTML = '';
+        noFurniture.style.display = 'block';
+        if (tableBody) {
+          tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No furniture found</td></tr>';
+        }
         return;
       }
-      
-      tbody.innerHTML = furniture.map(item => {
+
+      noFurniture.style.display = 'none';
+
+      // Display as product cards
+      grid.innerHTML = furniture.map(item => {
         const itemName = item.item_name || 'N/A';
+        const itemId = item.furniture_id || item.furnitureId;
+        const price = parseFloat(item.price || 0);
+        const stock = item.stock_quantity || item.stockQuantity || 0;
+        const category = item.category || 'Uncategorized';
+        const condition = item.item_condition || item.itemCondition || 'Good';
+        const description = item.description || 'Quality furniture for your space';
+
         return `
-        <tr>
-          <td>${item.furniture_id}</td>
-          <td>${itemName}</td>
-          <td>${item.category || '-'}</td>
-          <td>${item.item_condition || '-'}</td>
-          <td>$${parseFloat(item.price || 0).toFixed(2)}</td>
-          <td>${item.stock_quantity || 0}</td>
-          <td>
-            <button onclick="openEditFurnitureModal(${item.furniture_id})" class="btn btn-sm btn-outline-primary">Edit</button>
-            <button onclick="deleteFurniture(${item.furniture_id})" class="btn btn-sm btn-outline-danger">Delete</button>
-          </td>
-        </tr>
-      `;
+          <div class="col-md-6 col-lg-4">
+            <div class="card product-card shadow-sm">
+              <div class="position-relative">
+                <div class="product-image">
+                  ${getFurnitureIcon(category)}
+                </div>
+                ${stock > 0 
+                  ? `<span class="badge bg-success stock-badge">In Stock</span>`
+                  : `<span class="badge bg-danger stock-badge">Out of Stock</span>`
+                }
+              </div>
+              <div class="card-body">
+                <span class="category-badge">${category}</span>
+                <h5 class="card-title mt-2">${itemName}</h5>
+                <p class="card-text text-muted small">${description}</p>
+                <p class="text-muted small mb-2"><i class="bi bi-tag"></i> Condition: ${condition}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price-tag">$${price.toFixed(2)}</span>
+                  <button class="btn btn-primary" 
+                          onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})"
+                          ${stock === 0 ? 'disabled' : ''}>
+                    <i class="bi bi-cart-plus"></i> Add to Cart
+                  </button>
+                </div>
+                <small class="text-muted d-block mt-2">
+                  <i class="bi bi-box"></i> ${stock} available
+                </small>
+                ${isAdmin ? `
+                  <div class="mt-3 pt-3 border-top">
+                    <button onclick="openEditFurnitureModal(${itemId})" class="btn btn-sm btn-outline-primary me-2">
+                      <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button onclick="deleteFurniture(${itemId})" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
       }).join('');
+
+      // Also update table for admin view
+      if (tableBody && isAdmin) {
+        tableBody.innerHTML = furniture.map(item => {
+          const itemName = item.item_name || 'N/A';
+          const itemId = item.furniture_id || item.furnitureId;
+          return `
+            <tr>
+              <td>${itemId}</td>
+              <td>${itemName}</td>
+              <td>${item.category || '-'}</td>
+              <td>${item.item_condition || '-'}</td>
+              <td>$${parseFloat(item.price || 0).toFixed(2)}</td>
+              <td>${item.stock_quantity || 0}</td>
+              <td>
+                <button onclick="openEditFurnitureModal(${itemId})" class="btn btn-sm btn-outline-primary">Edit</button>
+                <button onclick="deleteFurniture(${itemId})" class="btn btn-sm btn-outline-danger">Delete</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function getFurnitureIcon(category) {
+      const icons = {
+        'Chair': '🪑',
+        'Table': '🪑',
+        'Sofa': '🛋️',
+        'Desk': '🪑',
+        'Bed': '🛏️',
+        'Dresser': '🪑',
+        'Bookshelf': '📚',
+        'Lamp': '💡'
+      };
+      return icons[category] || '🪑';
+    }
+
+    // Shopping cart functions
+    let shoppingCart = JSON.parse(localStorage.getItem('shoppingCart') || '[]');
+
+    function updateCartBadge() {
+      const userToken = localStorage.getItem('userToken');
+      const totalItems = shoppingCart.reduce((sum, item) => sum + item.quantity, 0);
+      const badge = document.getElementById('cartBadge');
+      if (badge) {
+        // Only show badge if user is logged in and has items
+        if (userToken && totalItems > 0) {
+          badge.textContent = totalItems;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    }
+
+    function addToCart(item) {
+      // Check if user is logged in
+      const userToken = localStorage.getItem('userToken');
+      if (!userToken) {
+        showLoginRequiredModal();
+        return;
+      }
+
+      const existingItem = shoppingCart.find(cartItem => cartItem.id === item.furniture_id);
+      if (existingItem) {
+        if (existingItem.quantity < item.stock_quantity) {
+          existingItem.quantity++;
+        } else {
+          alert('Cannot add more. Only ' + item.stock_quantity + ' in stock.');
+          return;
+        }
+      } else {
+        shoppingCart.push({
+          id: item.furniture_id,
+          name: item.item_name,
+          price: parseFloat(item.price),
+          quantity: 1,
+          stock: item.stock_quantity,
+          category: item.category
+        });
+      }
+      localStorage.setItem('shoppingCart', JSON.stringify(shoppingCart));
+      updateCartBadge();
+      showCartNotification();
+    }
+
+    function showLoginRequiredModal() {
+      // Create modal if it doesn't exist
+      let modal = document.getElementById('loginRequiredModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'loginRequiredModal';
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">
+                  <i class="bi bi-lock"></i> Sign In Required
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body text-center">
+                <i class="bi bi-cart-x" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i>
+                <p class="mb-3">Please sign in or create an account to add items to your cart and make purchases.</p>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <a href="./login.html" class="btn btn-primary">
+                  <i class="bi bi-box-arrow-in-right"></i> Sign In
+                </a>
+                <a href="./register.html" class="btn btn-outline-primary">
+                  <i class="bi bi-person-plus"></i> Create Account
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+    }
+
+    function showCartNotification() {
+      const notification = document.createElement('div');
+      notification.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+      notification.style.zIndex = '9999';
+      notification.innerHTML = '<i class="bi bi-check-circle"></i> Item added to cart!';
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+    }
+
+    function openCart() {
+      window.location.href = './index.html';
     }
 
     function populateCategories(categories) {
@@ -490,11 +754,19 @@
 
     // Update navigation based on login status
     const userToken = localStorage.getItem('userToken');
+    const userType = localStorage.getItem('userType');
     if (userToken) {
       document.getElementById('loginNavItem').style.display = 'none';
       document.getElementById('profileNavItem').style.display = 'block';
       document.getElementById('logoutNavItem').style.display = 'block';
+      if (userType === 'employee') {
+        document.getElementById('adminMenu').style.display = 'block';
+        document.getElementById('adminControls').style.display = 'block';
+      }
     }
+
+    // Initialize cart badge
+    updateCartBadge();
 
     // Load on page load
     loadFurniture('', '');

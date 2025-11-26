@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Campus ReHome</title>
+  <title>Campus ReHome - Marketplace</title>
   
   <!-- Bootstrap 5 CSS -->
   <link
@@ -13,132 +13,199 @@
     crossorigin="anonymous"
   />
   
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
   <!-- Custom CSS -->
   <link rel="stylesheet" href="./styles/main.css" />
+  <style>
+    .hero-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4rem 0;
+      margin-bottom: 3rem;
+    }
+    .product-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      height: 100%;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .product-image {
+      height: 200px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      color: #667eea;
+    }
+    .price-tag {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #28a745;
+    }
+    .stock-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .cart-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .category-badge {
+      background: #e9ecef;
+      color: #495057;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <a class="navbar-brand" href="./index.html">🏠 Campus ReHome</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <a class="navbar-brand fw-bold" href="./index.html">
+        <i class="bi bi-house-door"></i> Campus ReHome
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="./index.html">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./furniture.html">Browse All</a>
+          </li>
+        </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link active" href="./index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./furniture.html">Furniture</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./customers.html">Customers</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./employees.html">Employees</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./transactions.html">Transactions</a>
+            <a class="nav-link position-relative" href="#" onclick="openCart(); return false;">
+              <i class="bi bi-cart3"></i> Cart
+              <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
+            </a>
           </li>
           <li class="nav-item" id="loginNavItem">
             <a class="nav-link" href="./login.html">Login</a>
           </li>
           <li class="nav-item" id="profileNavItem" style="display: none;">
-            <a class="nav-link" href="./profile.html">Profile</a>
+            <a class="nav-link" href="./profile.html">
+              <i class="bi bi-person-circle"></i> My Profile
+            </a>
           </li>
           <li class="nav-item" id="logoutNavItem" style="display: none;">
             <a class="nav-link" href="#" onclick="logout(); return false;">Logout</a>
+          </li>
+          <li class="nav-item" id="adminMenu" style="display: none;">
+            <a class="nav-link" href="./admin.html">
+              <i class="bi bi-shield-check"></i> Admin
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./employee-login.html">
+              <i class="bi bi-briefcase"></i> Employee Login
+            </a>
           </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container my-4">
-    <div class="page-header text-center">
-      <div class="container">
-        <h1 class="display-4 mb-3">Welcome to Campus ReHome</h1>
-        <p class="lead mb-0">CollegeTown Furniture Platform - Alabama Style</p>
-      </div>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-3">
-        <div class="card home-card h-100">
-          <div class="card-body text-center">
-            <div class="mb-3" style="font-size: 3rem;">🪑</div>
-            <h5 class="card-title">Furniture</h5>
-            <p class="card-text text-muted">Browse and manage furniture inventory with search and filter capabilities</p>
-            <a href="./furniture.html" class="btn btn-primary w-100">View Furniture</a>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-md-6 col-lg-3">
-        <div class="card home-card h-100">
-          <div class="card-body text-center">
-            <div class="mb-3" style="font-size: 3rem;">👥</div>
-            <h5 class="card-title">Customers</h5>
-            <p class="card-text text-muted">Manage customer information and profiles</p>
-            <a href="./customers.html" class="btn btn-primary w-100">View Customers</a>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-md-6 col-lg-3">
-        <div class="card home-card h-100">
-          <div class="card-body text-center">
-            <div class="mb-3" style="font-size: 3rem;">👔</div>
-            <h5 class="card-title">Employees</h5>
-            <p class="card-text text-muted">Manage employee records and roles</p>
-            <a href="./employees.html" class="btn btn-primary w-100">View Employees</a>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-md-6 col-lg-3">
-        <div class="card home-card h-100">
-          <div class="card-body text-center">
-            <div class="mb-3" style="font-size: 3rem;">💰</div>
-            <h5 class="card-title">Transactions</h5>
-            <p class="card-text text-muted">View and create purchase transactions</p>
-            <a href="./transactions.html" class="btn btn-primary w-100">View Transactions</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mt-5">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Quick Stats</h5>
-            <div class="row text-center">
-              <div class="col-md-3">
-                <h3 class="text-primary">-</h3>
-                <p class="text-muted mb-0">Active Items</p>
-              </div>
-              <div class="col-md-3">
-                <h3 class="text-primary">-</h3>
-                <p class="text-muted mb-0">Total Customers</p>
-              </div>
-              <div class="col-md-3">
-                <h3 class="text-primary">-</h3>
-                <p class="text-muted mb-0">Active Employees</p>
-              </div>
-              <div class="col-md-3">
-                <h3 class="text-primary">-</h3>
-                <p class="text-muted mb-0">Total Transactions</p>
-              </div>
-            </div>
-          </div>
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="container text-center">
+      <h1 class="display-4 fw-bold mb-3">Welcome to Campus ReHome</h1>
+      <p class="lead mb-4">Find affordable, quality furniture for your college life</p>
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <form class="d-flex" onsubmit="event.preventDefault(); searchProducts();">
+            <input class="form-control form-control-lg me-2" type="search" id="heroSearch" placeholder="Search for furniture..." aria-label="Search">
+            <button class="btn btn-light btn-lg" type="submit">
+              <i class="bi bi-search"></i> Search
+            </button>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
-  <footer class="mt-5">
-    <div class="container">
+  <!-- Main Content -->
+      <div class="container">
+    <!-- Categories -->
+    <div class="mb-4">
+      <h3 class="mb-3">Shop by Category</h3>
+      <div class="d-flex flex-wrap gap-2" id="categoryFilters">
+        <button class="btn btn-outline-primary active" onclick="filterByCategory('')">All Items</button>
+      </div>
+    </div>
+
+    <!-- Featured Products -->
+    <div class="mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Featured Furniture</h3>
+        <a href="./furniture.html" class="btn btn-outline-primary">View All <i class="bi bi-arrow-right"></i></a>
+          </div>
+      <div id="productsLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <div id="productsGrid" class="row g-4">
+        <!-- Products will be loaded here -->
+      </div>
+      <div id="noProducts" class="text-center py-5" style="display: none;">
+        <p class="text-muted">No furniture items found. Check back soon!</p>
+          </div>
+        </div>
+      </div>
+      
+  <!-- Shopping Cart Modal -->
+  <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cartModalLabel">
+            <i class="bi bi-cart3"></i> Shopping Cart
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="cartItems">
+            <p class="text-muted text-center py-4">Your cart is empty</p>
+      </div>
+          <div id="cartTotal" class="border-top pt-3 mt-3" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5>Total:</h5>
+              <h5 class="text-success" id="cartTotalAmount">$0.00</h5>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" id="cartFooter" style="display: none;">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+          <button type="button" class="btn btn-primary" onclick="checkout()">Proceed to Checkout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-5 py-4 bg-light">
+    <div class="container text-center">
       <p class="mb-0">&copy; 2024 Campus ReHome - CollegeTown Furniture Platform | Roll Tide! 🐘</p>
     </div>
   </footer>
@@ -150,15 +217,317 @@
     crossorigin="anonymous"
   ></script>
   
-  <!-- Custom JS -->
-  <script src="./scripts/main.js"></script>
   <script>
-    // Update navigation based on login status
+    // Get API base URL
+    function getApiBaseUrl() {
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:5000/api';
+      }
+      return '/api';
+    }
+
+    // Shopping Cart
+    let shoppingCart = JSON.parse(localStorage.getItem('shoppingCart') || '[]');
+
+    function updateCartBadge() {
+      const userToken = localStorage.getItem('userToken');
+      const totalItems = shoppingCart.reduce((sum, item) => sum + item.quantity, 0);
+      const badge = document.getElementById('cartBadge');
+      
+      // Only show badge if user is logged in and has items
+      if (userToken && totalItems > 0) {
+        badge.textContent = totalItems;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function addToCart(item) {
+      // Check if user is logged in
+      const userToken = localStorage.getItem('userToken');
+      if (!userToken) {
+        showLoginRequiredModal();
+        return;
+      }
+
+      const existingItem = shoppingCart.find(cartItem => cartItem.id === item.furniture_id);
+      if (existingItem) {
+        if (existingItem.quantity < item.stock_quantity) {
+          existingItem.quantity++;
+        } else {
+          alert('Cannot add more. Only ' + item.stock_quantity + ' in stock.');
+          return;
+        }
+      } else {
+        shoppingCart.push({
+          id: item.furniture_id,
+          name: item.item_name,
+          price: parseFloat(item.price),
+          quantity: 1,
+          stock: item.stock_quantity,
+          category: item.category
+        });
+      }
+      localStorage.setItem('shoppingCart', JSON.stringify(shoppingCart));
+      updateCartBadge();
+      showCartNotification();
+    }
+
+    function showLoginRequiredModal() {
+      // Create modal if it doesn't exist
+      let modal = document.getElementById('loginRequiredModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'loginRequiredModal';
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">
+                  <i class="bi bi-lock"></i> Sign In Required
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body text-center">
+                <i class="bi bi-cart-x" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i>
+                <p class="mb-3">Please sign in or create an account to add items to your cart and make purchases.</p>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <a href="./login.html" class="btn btn-primary">
+                  <i class="bi bi-box-arrow-in-right"></i> Sign In
+                </a>
+                <a href="./register.html" class="btn btn-outline-primary">
+                  <i class="bi bi-person-plus"></i> Create Account
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+    }
+
+    function removeFromCart(itemId) {
+      shoppingCart = shoppingCart.filter(item => item.id !== itemId);
+      localStorage.setItem('shoppingCart', JSON.stringify(shoppingCart));
+      updateCartBadge();
+      displayCart();
+    }
+
+    function updateCartQuantity(itemId, quantity) {
+      const item = shoppingCart.find(i => i.id === itemId);
+      if (item) {
+        if (quantity <= 0) {
+          removeFromCart(itemId);
+        } else if (quantity <= item.stock) {
+          item.quantity = quantity;
+          localStorage.setItem('shoppingCart', JSON.stringify(shoppingCart));
+          updateCartBadge();
+          displayCart();
+        } else {
+          alert('Cannot add more. Only ' + item.stock + ' in stock.');
+        }
+      }
+    }
+
+    function showCartNotification() {
+      // Simple notification
+      const notification = document.createElement('div');
+      notification.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+      notification.style.zIndex = '9999';
+      notification.innerHTML = '<i class="bi bi-check-circle"></i> Item added to cart!';
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+    }
+
+    function openCart() {
+      // Check if user is logged in
+      const userToken = localStorage.getItem('userToken');
+      if (!userToken) {
+        showLoginRequiredModal();
+        return;
+      }
+
+      displayCart();
+      const modal = new bootstrap.Modal(document.getElementById('cartModal'));
+      modal.show();
+    }
+
+    function displayCart() {
+      const cartItems = document.getElementById('cartItems');
+      const cartTotal = document.getElementById('cartTotal');
+      const cartFooter = document.getElementById('cartFooter');
+
+      if (shoppingCart.length === 0) {
+        cartItems.innerHTML = '<p class="text-muted text-center py-4">Your cart is empty</p>';
+        cartTotal.style.display = 'none';
+        cartFooter.style.display = 'none';
+        return;
+      }
+
+      let total = 0;
+      cartItems.innerHTML = shoppingCart.map(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        return `
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+            <div class="flex-grow-1">
+              <h6 class="mb-1">${item.name}</h6>
+              <small class="text-muted">${item.category}</small>
+              <p class="mb-0 mt-1"><strong>$${item.price.toFixed(2)}</strong> each</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-outline-secondary" onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})">-</button>
+              <span class="fw-bold">${item.quantity}</span>
+              <button class="btn btn-sm btn-outline-secondary" onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})">+</button>
+              <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeFromCart(${item.id})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+            <div class="ms-3">
+              <strong>$${itemTotal.toFixed(2)}</strong>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('cartTotalAmount').textContent = '$' + total.toFixed(2);
+      cartTotal.style.display = 'block';
+      cartFooter.style.display = 'flex';
+    }
+
+    function checkout() {
+      const userToken = localStorage.getItem('userToken');
+      if (!userToken) {
+        alert('Please login to checkout');
+        window.location.href = './login.html';
+        return;
+      }
+      window.location.href = './checkout.html';
+    }
+
+    function filterByCategory(category) {
+      document.querySelectorAll('#categoryFilters .btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      loadProducts(category);
+    }
+
+    function searchProducts() {
+      const searchTerm = document.getElementById('heroSearch').value;
+      loadProducts('', searchTerm);
+    }
+
+    async function loadProducts(category = '', search = '') {
+      try {
+        document.getElementById('productsLoading').style.display = 'block';
+        document.getElementById('productsGrid').innerHTML = '';
+        document.getElementById('noProducts').style.display = 'none';
+
+        let url = `${getApiBaseUrl()}/furniture?format=json`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (category) url += `&category=${encodeURIComponent(category)}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to load products');
+        
+        const data = await response.json();
+        const products = data.furniture || [];
+        
+        document.getElementById('productsLoading').style.display = 'none';
+
+        if (products.length === 0) {
+          document.getElementById('noProducts').style.display = 'block';
+          return;
+        }
+
+        // Display products in grid
+        const grid = document.getElementById('productsGrid');
+        grid.innerHTML = products.map(item => `
+          <div class="col-md-6 col-lg-4">
+            <div class="card product-card shadow-sm">
+              <div class="position-relative">
+                <div class="product-image">
+                  ${getFurnitureIcon(item.category)}
+                </div>
+                ${item.stock_quantity > 0 
+                  ? `<span class="badge bg-success stock-badge">In Stock</span>`
+                  : `<span class="badge bg-danger stock-badge">Out of Stock</span>`
+                }
+              </div>
+              <div class="card-body">
+                <span class="category-badge">${item.category}</span>
+                <h5 class="card-title mt-2">${item.item_name}</h5>
+                <p class="card-text text-muted small">${item.description || 'Quality furniture for your space'}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price-tag">$${parseFloat(item.price).toFixed(2)}</span>
+                  <button class="btn btn-primary" 
+                          onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})"
+                          ${item.stock_quantity === 0 ? 'disabled' : ''}>
+                    <i class="bi bi-cart-plus"></i> Add to Cart
+                  </button>
+                </div>
+                <small class="text-muted d-block mt-2">
+                  <i class="bi bi-box"></i> ${item.stock_quantity} available
+                </small>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        // Load categories
+        if (!category) {
+          loadCategories(products);
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        document.getElementById('productsLoading').style.display = 'none';
+        document.getElementById('productsGrid').innerHTML = 
+          '<div class="col-12"><div class="alert alert-danger">Error loading products. Please try again.</div></div>';
+      }
+    }
+
+    function getFurnitureIcon(category) {
+      const icons = {
+        'Chair': '🪑',
+        'Table': '🪑',
+        'Sofa': '🛋️',
+        'Desk': '🪑',
+        'Bed': '🛏️',
+        'Dresser': '🪑',
+        'Bookshelf': '📚',
+        'Lamp': '💡'
+      };
+      return icons[category] || '🪑';
+    }
+
+    async function loadCategories(products) {
+      const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+      const filters = document.getElementById('categoryFilters');
+      filters.innerHTML = '<button class="btn btn-outline-primary active" onclick="filterByCategory(\'\')">All Items</button>';
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline-primary';
+        btn.textContent = cat;
+        btn.onclick = () => filterByCategory(cat);
+        filters.appendChild(btn);
+      });
+    }
+
+    // Update navigation
     const userToken = localStorage.getItem('userToken');
+    const userType = localStorage.getItem('userType');
     if (userToken) {
       document.getElementById('loginNavItem').style.display = 'none';
       document.getElementById('profileNavItem').style.display = 'block';
       document.getElementById('logoutNavItem').style.display = 'block';
+      if (userType === 'employee') {
+        document.getElementById('adminMenu').style.display = 'block';
+      }
     }
 
     function logout() {
@@ -168,13 +537,19 @@
         localStorage.removeItem('userType');
         localStorage.removeItem('userName');
         localStorage.removeItem('userEmail');
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('adminRole');
+        // Clear shopping cart when logging out
+        shoppingCart = [];
+        localStorage.removeItem('shoppingCart');
+        updateCartBadge();
         window.location.href = './index.html';
       }
     }
+
+    // Initialize
+    updateCartBadge();
+    loadProducts();
   </script>
 </body>
 </html>
-
-
-
-

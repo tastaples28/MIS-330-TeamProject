@@ -25,39 +25,16 @@ public class AuthController : ControllerBase
 
         try
         {
-            if (request.UserType == "customer")
+            // Auto-detect user type by checking both customer and employee tables
+            // Check employees first (since they're typically fewer and more restricted)
+            var employees = await _db.GetAllEmployeesAsync();
+            var employee = employees.FirstOrDefault(e => 
+                e.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) && 
+                e.UserPassword == request.Password &&
+                e.IsActive);
+
+            if (employee != null)
             {
-                var customers = await _db.GetAllCustomersAsync();
-                var customer = customers.FirstOrDefault(c => 
-                    c.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) && 
-                    c.UserPassword == request.Password);
-
-                if (customer == null)
-                {
-                    return Unauthorized(new { message = "Invalid email or password" });
-                }
-
-                return Ok(new
-                {
-                    token = $"customer_{customer.CustomerId}",
-                    userId = customer.CustomerId,
-                    name = $"{customer.FirstName} {customer.LastName}",
-                    userType = "customer"
-                });
-            }
-            else if (request.UserType == "employee")
-            {
-                var employees = await _db.GetAllEmployeesAsync();
-                var employee = employees.FirstOrDefault(e => 
-                    e.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) && 
-                    e.UserPassword == request.Password &&
-                    e.IsActive);
-
-                if (employee == null)
-                {
-                    return Unauthorized(new { message = "Invalid email or password" });
-                }
-
                 return Ok(new
                 {
                     token = $"employee_{employee.EmployeeId}",
@@ -66,10 +43,26 @@ public class AuthController : ControllerBase
                     userType = "employee"
                 });
             }
-            else
+
+            // If not found as employee, check customers
+            var customers = await _db.GetAllCustomersAsync();
+            var customer = customers.FirstOrDefault(c => 
+                c.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) && 
+                c.UserPassword == request.Password);
+
+            if (customer != null)
             {
-                return BadRequest(new { message = "Invalid user type" });
+                return Ok(new
+                {
+                    token = $"customer_{customer.CustomerId}",
+                    userId = customer.CustomerId,
+                    name = $"{customer.FirstName} {customer.LastName}",
+                    userType = "customer"
+                });
             }
+
+            // Not found in either table
+            return Unauthorized(new { message = "Invalid email or password" });
         }
         catch (Exception ex)
         {

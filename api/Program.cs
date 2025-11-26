@@ -10,8 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Use snake_case for JSON property names to match frontend expectations
+        // Use snake_case for JSON property names in RESPONSES only
+        // For INPUT (deserialization), accept PascalCase directly
         options.JsonSerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy();
+        // Allow case-insensitive property matching for deserialization
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        // Configure to handle both input formats
+        options.JsonSerializerOptions.ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip;
+        options.JsonSerializerOptions.AllowTrailingCommas = true;
+    })
+    .AddJsonOptions(options =>
+    {
+        // Create a separate options for input that doesn't use naming policy
+        // This is a workaround - we'll handle input manually in controllers
     });
 builder.Services.AddSingleton<DatabaseService>(sp =>
 {
@@ -81,6 +92,10 @@ app.MapGet("/transactions", async (HttpContext context) => await ServeHtmlFile(c
 app.MapGet("/login", async (HttpContext context) => await ServeHtmlFile(context, "login.html", contentRoot));
 app.MapGet("/register", async (HttpContext context) => await ServeHtmlFile(context, "register.html", contentRoot));
 app.MapGet("/profile", async (HttpContext context) => await ServeHtmlFile(context, "profile.html", contentRoot));
+app.MapGet("/checkout", async (HttpContext context) => await ServeHtmlFile(context, "checkout.html", contentRoot));
+app.MapGet("/employee-login", async (HttpContext context) => await ServeHtmlFile(context, "employee-login.html", contentRoot));
+app.MapGet("/admin-login", async (HttpContext context) => await ServeHtmlFile(context, "employee-login.html", contentRoot)); // Redirect old URL
+app.MapGet("/admin", async (HttpContext context) => await ServeHtmlFile(context, "admin.html", contentRoot));
 
 // 3. API controllers (for /api/* routes)
 app.MapControllers();
@@ -93,6 +108,10 @@ app.MapGet("/transactions/{*path}", async (HttpContext context) => await ServeHt
 app.MapGet("/login/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "login.html", contentRoot));
 app.MapGet("/register/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "register.html", contentRoot));
 app.MapGet("/profile/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "profile.html", contentRoot));
+app.MapGet("/checkout/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "checkout.html", contentRoot));
+app.MapGet("/employee-login/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "employee-login.html", contentRoot));
+app.MapGet("/admin-login/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "employee-login.html", contentRoot)); // Redirect old URL
+app.MapGet("/admin/{*path}", async (HttpContext context) => await ServeHtmlFile(context, "admin.html", contentRoot));
 
 app.Run();
 

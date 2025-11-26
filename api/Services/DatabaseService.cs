@@ -76,15 +76,34 @@ public class DatabaseService
 
     public async Task<int> CreateCustomerAsync(Customer customer)
     {
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(customer.FirstName))
+            throw new ArgumentException("First name is required", nameof(customer));
+        if (string.IsNullOrWhiteSpace(customer.LastName))
+            throw new ArgumentException("Last name is required", nameof(customer));
+        if (string.IsNullOrWhiteSpace(customer.Email))
+            throw new ArgumentException("Email is required", nameof(customer));
+        if (string.IsNullOrWhiteSpace(customer.UserPassword))
+            throw new ArgumentException("Password is required", nameof(customer));
+        
         using var connection = await GetConnectionAsync();
         var command = new MySqlCommand(
             "INSERT INTO customer (first_name, last_name, email, phone, userpassword, address) VALUES (@firstName, @lastName, @email, @phone, @password, @address)",
             connection);
-        command.Parameters.AddWithValue("@firstName", customer.FirstName);
-        command.Parameters.AddWithValue("@lastName", customer.LastName);
-        command.Parameters.AddWithValue("@email", customer.Email);
+        
+        // Ensure values are not null
+        command.Parameters.AddWithValue("@firstName", customer.FirstName ?? string.Empty);
+        command.Parameters.AddWithValue("@lastName", customer.LastName ?? string.Empty);
+        command.Parameters.AddWithValue("@email", customer.Email ?? string.Empty);
         command.Parameters.AddWithValue("@phone", (object?)customer.Phone ?? DBNull.Value);
-        command.Parameters.AddWithValue("@password", customer.UserPassword);
+        // Ensure password is not null or empty
+        var password = customer.UserPassword ?? string.Empty;
+        if (string.IsNullOrEmpty(password))
+        {
+            throw new ArgumentException("Password cannot be empty", nameof(customer));
+        }
+        command.Parameters.AddWithValue("@password", password);
+        Console.WriteLine($"Inserting password: Length={password.Length}, Value={(password.Length > 0 ? "***" : "EMPTY")}"); // Debug
         command.Parameters.AddWithValue("@address", (object?)customer.Address ?? DBNull.Value);
         
         await command.ExecuteNonQueryAsync();
@@ -173,16 +192,30 @@ public class DatabaseService
 
     public async Task<int> CreateEmployeeAsync(Employee employee)
     {
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(employee.FirstName))
+            throw new ArgumentException("First name is required", nameof(employee));
+        if (string.IsNullOrWhiteSpace(employee.LastName))
+            throw new ArgumentException("Last name is required", nameof(employee));
+        if (string.IsNullOrWhiteSpace(employee.Email))
+            throw new ArgumentException("Email is required", nameof(employee));
+        if (string.IsNullOrWhiteSpace(employee.UserPassword))
+            throw new ArgumentException("Password is required", nameof(employee));
+        if (string.IsNullOrWhiteSpace(employee.Role))
+            throw new ArgumentException("Role is required", nameof(employee));
+        
         using var connection = await GetConnectionAsync();
         var command = new MySqlCommand(
             "INSERT INTO employee (first_name, last_name, email, phone_number, userpassword, role, hire_date, is_active) VALUES (@firstName, @lastName, @email, @phone, @password, @role, @hireDate, @isActive)",
             connection);
-        command.Parameters.AddWithValue("@firstName", employee.FirstName);
-        command.Parameters.AddWithValue("@lastName", employee.LastName);
-        command.Parameters.AddWithValue("@email", employee.Email);
+        
+        // Ensure values are not null
+        command.Parameters.AddWithValue("@firstName", employee.FirstName ?? string.Empty);
+        command.Parameters.AddWithValue("@lastName", employee.LastName ?? string.Empty);
+        command.Parameters.AddWithValue("@email", employee.Email ?? string.Empty);
         command.Parameters.AddWithValue("@phone", (object?)employee.PhoneNumber ?? DBNull.Value);
-        command.Parameters.AddWithValue("@password", employee.UserPassword);
-        command.Parameters.AddWithValue("@role", employee.Role);
+        command.Parameters.AddWithValue("@password", employee.UserPassword ?? string.Empty);
+        command.Parameters.AddWithValue("@role", employee.Role ?? string.Empty);
         command.Parameters.AddWithValue("@hireDate", (object?)employee.HireDate ?? DBNull.Value);
         command.Parameters.AddWithValue("@isActive", employee.IsActive);
         

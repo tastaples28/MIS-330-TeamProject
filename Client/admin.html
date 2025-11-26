@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - Campus ReHome</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./styles/main.css" />
+  <style>
+    .admin-sidebar {
+      min-height: 100vh;
+      background: #343a40;
+      color: white;
+      padding: 2rem 0;
+    }
+    .admin-sidebar .nav-link {
+      color: rgba(255,255,255,0.8);
+      padding: 0.75rem 1.5rem;
+      border-left: 3px solid transparent;
+    }
+    .admin-sidebar .nav-link:hover,
+    .admin-sidebar .nav-link.active {
+      color: white;
+      background: rgba(255,255,255,0.1);
+      border-left-color: #0d6efd;
+    }
+    .stat-card {
+      transition: transform 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
+</head>
+<body>
+  <!-- Admin Navigation -->
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="./admin.html">
+        <i class="bi bi-shield-check"></i> Admin Dashboard
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="text-light me-3" id="adminName">Admin</span>
+        <a href="./index.html" class="btn btn-outline-light btn-sm me-2">
+          <i class="bi bi-shop"></i> View Store
+        </a>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 admin-sidebar">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" onclick="showSection('dashboard'); return false;">
+              <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('furniture'); return false;">
+              <i class="bi bi-furniture"></i> Furniture Management
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('customers'); return false;">
+              <i class="bi bi-people"></i> Customer Management
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('employees'); return false;">
+              <i class="bi bi-person-badge"></i> Employee Management
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('transactions'); return false;">
+              <i class="bi bi-receipt"></i> Transactions
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 p-4">
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="content-section">
+          <h2 class="mb-4">Dashboard Overview</h2>
+          
+          <!-- Stats Cards -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-3">
+              <div class="card stat-card border-primary">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="text-muted mb-1">Total Furniture</h6>
+                      <h3 class="mb-0" id="statFurniture">-</h3>
+                    </div>
+                    <i class="bi bi-furniture text-primary" style="font-size: 2rem;"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card border-success">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="text-muted mb-1">Total Customers</h6>
+                      <h3 class="mb-0" id="statCustomers">-</h3>
+                    </div>
+                    <i class="bi bi-people text-success" style="font-size: 2rem;"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card border-info">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="text-muted mb-1">Total Employees</h6>
+                      <h3 class="mb-0" id="statEmployees">-</h3>
+                    </div>
+                    <i class="bi bi-person-badge text-info" style="font-size: 2rem;"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card border-warning">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="text-muted mb-1">Total Transactions</h6>
+                      <h3 class="mb-0" id="statTransactions">-</h3>
+                    </div>
+                    <i class="bi bi-receipt text-warning" style="font-size: 2rem;"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <a href="./furniture.html" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-plus-circle"></i> Add New Furniture
+                  </a>
+                </div>
+                <div class="col-md-4">
+                  <a href="./customers.html" class="btn btn-outline-success w-100">
+                    <i class="bi bi-person-plus"></i> Add New Customer
+                  </a>
+                </div>
+                <div class="col-md-4">
+                  <a href="./employees.html" class="btn btn-outline-info w-100">
+                    <i class="bi bi-person-badge"></i> Add New Employee
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Furniture Management Section -->
+        <div id="furnitureSection" class="content-section" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Furniture Management</h2>
+            <a href="./furniture.html" class="btn btn-outline-primary" target="_blank">
+              <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
+            </a>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <p class="text-muted">Use the links below to access full management pages with all CRUD features:</p>
+              <div class="list-group">
+                <a href="./furniture.html" class="list-group-item list-group-item-action">
+                  <i class="bi bi-furniture"></i> Furniture Management (Create, Read, Update, Delete)
+                </a>
+                <a href="./customers.html" class="list-group-item list-group-item-action">
+                  <i class="bi bi-people"></i> Customer Management (Create, Read, Update, Delete)
+                </a>
+                <a href="./employees.html" class="list-group-item list-group-item-action">
+                  <i class="bi bi-person-badge"></i> Employee Management (Create, Read, Update, Delete)
+                </a>
+                <a href="./transactions.html" class="list-group-item list-group-item-action">
+                  <i class="bi bi-receipt"></i> Transaction Management (View and Create)
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Management Section -->
+        <div id="customersSection" class="content-section" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Customer Management</h2>
+            <a href="./customers.html" class="btn btn-outline-primary" target="_blank">
+              <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
+            </a>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <p class="text-muted">Full customer management with CRUD operations available at:</p>
+              <a href="./customers.html" class="btn btn-primary">
+                <i class="bi bi-people"></i> Go to Customer Management
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employee Management Section -->
+        <div id="employeesSection" class="content-section" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Employee Management</h2>
+            <a href="./employees.html" class="btn btn-outline-primary" target="_blank">
+              <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
+            </a>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <p class="text-muted">Full employee management with CRUD operations available at:</p>
+              <a href="./employees.html" class="btn btn-primary">
+                <i class="bi bi-person-badge"></i> Go to Employee Management
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions Section -->
+        <div id="transactionsSection" class="content-section" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Transaction Management</h2>
+            <a href="./transactions.html" class="btn btn-outline-primary" target="_blank">
+              <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
+            </a>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <p class="text-muted">Full transaction management available at:</p>
+              <a href="./transactions.html" class="btn btn-primary">
+                <i class="bi bi-receipt"></i> Go to Transaction Management
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+  
+  <script>
+    function getApiBaseUrl() {
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:5000/api';
+      }
+      return '/api';
+    }
+
+    // Check admin access
+    const userToken = localStorage.getItem('userToken');
+    const userType = localStorage.getItem('userType');
+    const isAdmin = localStorage.getItem('isAdmin');
+
+    if (!userToken || userType !== 'employee') {
+      window.location.href = './employee-login.html';
+    }
+
+    // Load admin name
+    const userId = localStorage.getItem('userId');
+    const userName = localStorage.getItem('userName');
+    if (userName) {
+      document.getElementById('adminName').textContent = userName;
+    }
+
+    function showSection(sectionName) {
+      // Hide all sections
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+      });
+
+      // Show selected section
+      document.getElementById(sectionName + 'Section').style.display = 'block';
+
+      // Update active nav link
+      document.querySelectorAll('.admin-sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      event.target.closest('.nav-link').classList.add('active');
+    }
+
+    async function loadDashboardStats() {
+      try {
+        // Load furniture count
+        const furnitureRes = await fetch(`${getApiBaseUrl()}/furniture?format=json`);
+        if (furnitureRes.ok) {
+          const furnitureData = await furnitureRes.json();
+          document.getElementById('statFurniture').textContent = (furnitureData.furniture || []).length;
+        }
+
+        // Load customers count
+        const customersRes = await fetch(`${getApiBaseUrl()}/customers?format=json`);
+        if (customersRes.ok) {
+          const customersData = await customersRes.json();
+          document.getElementById('statCustomers').textContent = (customersData.customers || []).length;
+        }
+
+        // Load employees count
+        const employeesRes = await fetch(`${getApiBaseUrl()}/employees?format=json`);
+        if (employeesRes.ok) {
+          const employeesData = await employeesRes.json();
+          document.getElementById('statEmployees').textContent = (employeesData.employees || []).length;
+        }
+
+        // Load transactions count
+        const transactionsRes = await fetch(`${getApiBaseUrl()}/transactions?format=json`);
+        if (transactionsRes.ok) {
+          const transactionsData = await transactionsRes.json();
+          document.getElementById('statTransactions').textContent = (transactionsData.transactions || []).length;
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('adminRole');
+        window.location.href = './employee-login.html';
+      }
+    }
+
+    // Initialize
+    loadDashboardStats();
+  </script>
+</body>
+</html>
+

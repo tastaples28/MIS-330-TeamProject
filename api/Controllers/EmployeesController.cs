@@ -39,10 +39,50 @@ public class EmployeesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateEmployee([FromBody] Employee employee)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        // Debug: Log what we received
+        Console.WriteLine($"Received employee: FirstName={employee?.FirstName}, LastName={employee?.LastName}, Email={employee?.Email}, Password={(employee?.UserPassword != null ? "***" : "null")}");
         
-        var id = await _db.CreateEmployeeAsync(employee);
-        return CreatedAtAction(nameof(GetEmployee), new { id }, employee);
+        // Validate required fields manually
+        if (employee == null)
+        {
+            return BadRequest(new { message = "Employee data is required" });
+        }
+        
+        if (string.IsNullOrWhiteSpace(employee.FirstName))
+        {
+            return BadRequest(new { message = "First name is required" });
+        }
+        
+        if (string.IsNullOrWhiteSpace(employee.LastName))
+        {
+            return BadRequest(new { message = "Last name is required" });
+        }
+        
+        if (string.IsNullOrWhiteSpace(employee.Email))
+        {
+            return BadRequest(new { message = "Email is required" });
+        }
+        
+        if (string.IsNullOrWhiteSpace(employee.UserPassword))
+        {
+            return BadRequest(new { message = "Password is required" });
+        }
+        
+        if (string.IsNullOrWhiteSpace(employee.Role))
+        {
+            return BadRequest(new { message = "Role is required" });
+        }
+        
+        try
+        {
+            var id = await _db.CreateEmployeeAsync(employee);
+            return CreatedAtAction(nameof(GetEmployee), new { id }, employee);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating employee: {ex.Message}");
+            return StatusCode(500, new { message = "Error creating employee", error = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
