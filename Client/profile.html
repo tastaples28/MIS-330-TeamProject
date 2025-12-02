@@ -173,6 +173,26 @@
             <div id="profileError" class="alert alert-danger" style="display: none;"></div>
           </div>
         </div>
+
+        <!-- Transaction History Section (Customers Only) -->
+        <div id="transactionHistorySection" class="card shadow mt-4" style="display: none;">
+          <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Order History</h3>
+          </div>
+          <div class="card-body">
+            <div id="transactionsLoading" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            
+            <div id="transactionsContent" style="display: none;">
+              <div id="transactionsList"></div>
+            </div>
+            
+            <div id="transactionsError" class="alert alert-danger" style="display: none;"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -423,6 +443,100 @@
       
       document.getElementById('profileLoading').style.display = 'none';
       document.getElementById('profileContent').style.display = 'block';
+      
+      // Load transaction history for customers
+      if (userType === 'customer') {
+        const customerId = user.customer_id || userId;
+        console.log('Loading transactions for customer ID:', customerId, 'user object:', user);
+        if (customerId) {
+          loadCustomerTransactions(customerId);
+        } else {
+          console.error('No customer ID found - user:', user, 'userId:', userId);
+        }
+      }
+    }
+
+    async function loadCustomerTransactions(customerId) {
+      try {
+        document.getElementById('transactionHistorySection').style.display = 'block';
+        document.getElementById('transactionsLoading').style.display = 'block';
+        document.getElementById('transactionsContent').style.display = 'none';
+        document.getElementById('transactionsError').style.display = 'none';
+        
+        const url = `${getApiBaseUrl()}/transactions/customer/${customerId}`;
+        console.log('Loading transactions from:', url);
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error:', response.status, errorText);
+          throw new Error(`Failed to load transactions: ${response.status} ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Transactions data:', data);
+        const transactions = data.transactions || [];
+        
+        displayCustomerTransactions(transactions);
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+        document.getElementById('transactionsLoading').style.display = 'none';
+        document.getElementById('transactionsError').textContent = `Error loading order history: ${error.message}. Please try again.`;
+        document.getElementById('transactionsError').style.display = 'block';
+      }
+    }
+
+    function displayCustomerTransactions(transactions) {
+      const transactionsList = document.getElementById('transactionsList');
+      
+      if (transactions.length === 0) {
+        transactionsList.innerHTML = '<p class="text-muted text-center">No orders yet. Start shopping to see your order history here!</p>';
+        document.getElementById('transactionsLoading').style.display = 'none';
+        document.getElementById('transactionsContent').style.display = 'block';
+        return;
+      }
+      
+      transactionsList.innerHTML = transactions.map(transaction => {
+        const date = new Date(transaction.transaction_date || transaction.transactionDate).toLocaleDateString();
+        const statusClass = transaction.status === 'Completed' ? 'bg-success' : 
+                           transaction.status === 'Pending' ? 'bg-warning' : 'bg-secondary';
+        const statusTextColor = transaction.status === 'Pending' ? 'text-dark' : '';
+        
+        // Build items list
+        const details = transaction.details || transaction.Details || [];
+        const itemsList = details.length > 0 
+          ? details.map(detail => {
+              const itemName = detail.furniture_name || detail.furnitureName || `Item #${detail.furniture_id || detail.furnitureId}`;
+              const quantity = detail.quantity || detail.Quantity || 0;
+              const price = parseFloat(detail.sale_price || detail.salePrice || detail.SalePrice || 0).toFixed(2);
+              return `<li>${itemName} × ${quantity} - $${price}</li>`;
+            }).join('')
+          : '<li>No items found</li>';
+        
+        return `
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-8">
+                  <h5 class="card-title">Order #${transaction.transaction_id || transaction.transactionId}</h5>
+                  <p class="text-muted mb-2"><strong>Date:</strong> ${date}</p>
+                  <p class="text-muted mb-2"><strong>Payment Method:</strong> ${transaction.payment_method || transaction.paymentMethod}</p>
+                  <p class="mb-2"><strong>Items:</strong></p>
+                  <ul class="mb-0">${itemsList}</ul>
+                </div>
+                <div class="col-md-4 text-end">
+                  <h4 class="text-primary mb-3">$${parseFloat(transaction.total_amount || transaction.totalAmount || 0).toFixed(2)}</h4>
+                  <span class="badge ${statusClass} ${statusTextColor} fs-6">${transaction.status}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('transactionsLoading').style.display = 'none';
+      document.getElementById('transactionsContent').style.display = 'block';
     }
 
     async function submitProfileEdit() {

@@ -16,7 +16,7 @@ public class FurnitureController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetFurniture([FromQuery] string? format, [FromQuery] string? search, [FromQuery] string? category)
+    public async Task<IActionResult> GetFurniture([FromQuery] string? format, [FromQuery] string? search, [FromQuery] string? category, [FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
     {
         // Only respond to API requests (with format=json)
         if (format != "json")
@@ -24,7 +24,7 @@ public class FurnitureController : ControllerBase
             return NotFound(); // Let HTML route handle it
         }
         
-        var furniture = await _db.GetAllFurnitureAsync(search, category);
+        var furniture = await _db.GetAllFurnitureAsync(search, category, minPrice, maxPrice);
         var categories = await _db.GetCategoriesAsync();
         return Ok(new { furniture, categories });
     }

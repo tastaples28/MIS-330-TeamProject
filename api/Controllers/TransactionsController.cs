@@ -28,6 +28,22 @@ public class TransactionsController : ControllerBase
         return Ok(new { transactions });
     }
 
+    [HttpGet("customer/{customerId}")]
+    public async Task<IActionResult> GetTransactionsByCustomer(int customerId)
+    {
+        try
+        {
+            var transactions = await _db.GetTransactionsByCustomerIdAsync(customerId);
+            return Ok(new { transactions });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting transactions for customer {customerId}: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            return StatusCode(500, new { message = "Error loading transactions", error = ex.Message });
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTransaction(int id)
     {

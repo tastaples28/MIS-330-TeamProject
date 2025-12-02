@@ -251,7 +251,7 @@ public class DatabaseService
     }
 
     // Furniture methods
-    public async Task<List<Furniture>> GetAllFurnitureAsync(string? search = null, string? category = null)
+    public async Task<List<Furniture>> GetAllFurnitureAsync(string? search = null, string? category = null, decimal? minPrice = null, decimal? maxPrice = null)
     {
         var furniture = new List<Furniture>();
         using var connection = await GetConnectionAsync();
@@ -271,6 +271,20 @@ public class DatabaseService
             query += " AND category = @category";
             command.CommandText = query;
             command.Parameters.AddWithValue("@category", category);
+        }
+        
+        if (minPrice.HasValue)
+        {
+            query += " AND price >= @minPrice";
+            command.CommandText = query;
+            command.Parameters.AddWithValue("@minPrice", minPrice.Value);
+        }
+        
+        if (maxPrice.HasValue)
+        {
+            query += " AND price <= @maxPrice";
+            command.CommandText = query;
+            command.Parameters.AddWithValue("@maxPrice", maxPrice.Value);
         }
         
         query += " AND is_active = 1 ORDER BY furniture_id";
@@ -410,6 +424,47 @@ public class DatabaseService
                 EmployeeFirstName = reader.IsDBNull("employee_first_name") ? null : reader.GetString("employee_first_name"),
                 EmployeeLastName = reader.IsDBNull("employee_last_name") ? null : reader.GetString("employee_last_name")
             });
+        }
+        return transactions;
+    }
+
+    public async Task<List<Transaction>> GetTransactionsByCustomerIdAsync(int customerId)
+    {
+        var transactions = new List<Transaction>();
+        using var connection = await GetConnectionAsync();
+        var command = new MySqlCommand(
+            @"SELECT t.transaction_id, t.customer_id, t.employee_id, t.transaction_date, t.total_amount, t.payment_method, t.status,
+                     c.first_name AS customer_first_name, c.last_name AS customer_last_name,
+                     e.first_name AS employee_first_name, e.last_name AS employee_last_name
+              FROM CustomerPurchaseTransaction t
+              LEFT JOIN customer c ON t.customer_id = c.customer_id
+              LEFT JOIN employee e ON t.employee_id = e.employee_id
+              WHERE t.customer_id = @customerId
+              ORDER BY t.transaction_date DESC, t.transaction_id DESC",
+            connection);
+        command.Parameters.AddWithValue("@customerId", customerId);
+        
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var transaction = new Transaction
+            {
+                TransactionId = reader.GetInt32("transaction_id"),
+                CustomerId = reader.GetInt32("customer_id"),
+                EmployeeId = reader.GetInt32("employee_id"),
+                TransactionDate = reader.GetDateTime("transaction_date"),
+                TotalAmount = reader.GetDecimal("total_amount"),
+                PaymentMethod = reader.GetString("payment_method"),
+                Status = reader.GetString("status"),
+                CustomerFirstName = reader.IsDBNull("customer_first_name") ? null : reader.GetString("customer_first_name"),
+                CustomerLastName = reader.IsDBNull("customer_last_name") ? null : reader.GetString("customer_last_name"),
+                EmployeeFirstName = reader.IsDBNull("employee_first_name") ? null : reader.GetString("employee_first_name"),
+                EmployeeLastName = reader.IsDBNull("employee_last_name") ? null : reader.GetString("employee_last_name")
+            };
+            
+            // Load transaction details
+            transaction.Details = await GetTransactionDetailsAsync(transaction.TransactionId);
+            transactions.Add(transaction);
         }
         return transactions;
     }
